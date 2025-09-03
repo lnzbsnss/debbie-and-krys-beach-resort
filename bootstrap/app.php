@@ -21,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        $middleware->append(\Spatie\CookieConsent\CookieConsentMiddleware::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -3,21 +3,29 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $globalPermission = Permission::create(['name' => 'global-access']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create Admin role with global access
+        $adminRole = Role::create(['name' => 'Admin']);
+        $adminRole->givePermissionTo($globalPermission);
+
+        // Create admin user
+        $admin = User::create([
+            'name' => 'Administrator',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('P@ssw0rd'),
+            'email_verified_at' => now(),
         ]);
+
+        // Assign Admin role to user
+        $admin->assignRole($adminRole);
     }
 }
