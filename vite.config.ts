@@ -11,6 +11,7 @@ export default defineConfig({
             ssr: 'resources/js/ssr.tsx',
             refresh: true,
             buildDirectory: '../build',
+            hotFile: '../build/.vite/hot',
         }),
         react(),
         tailwindcss(),
@@ -24,5 +25,6 @@ export default defineConfig({
     build: {
         outDir: '../build',
         emptyOutDir: true,
+        manifest: true,
     },
 });
