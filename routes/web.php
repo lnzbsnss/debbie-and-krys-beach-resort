@@ -19,7 +19,7 @@ Route::middleware(['auth', 'verified', 'check.user.status'])->group(function () 
     })->name('dashboard');
 
     Route::resource('users', UserController::class);
-    Route::resource('roles', RoleController::class);
+    Route::resource('roles', RoleController::class)->except(['create', 'show', 'edit']);
 });
 
 require __DIR__.'/settings.php';
