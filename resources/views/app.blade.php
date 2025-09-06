@@ -18,7 +18,7 @@
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'Debbie & Krys Beach Resort') }}</title>
 
         <link rel="icon" href="/dk-logo.png" type="image/png">
         <link rel="icon" href="/dk-logo.png" sizes="32x32" type="image/png">

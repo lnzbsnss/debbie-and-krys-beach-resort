@@ -4,6 +4,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
+import { Toaster } from 'sonner';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -19,6 +20,12 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+<Toaster
+    position="top-right"
+    richColors
+    closeButton
+/>
 
 // This will set light mode on load...
 initializeTheme();
