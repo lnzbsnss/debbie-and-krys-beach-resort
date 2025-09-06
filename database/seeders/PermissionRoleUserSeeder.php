@@ -17,6 +17,18 @@ class PermissionRoleUserSeeder extends Seeder
         $permissions = [
             // global
             'global access',
+
+            // user
+            'user view',
+            'user create',
+            'user edit',
+            'user delete',
+
+            // role
+            'role view',
+            'role create',
+            'role edit',
+            'role delete',
         ];
 
         foreach ($permissions as $permission) {
