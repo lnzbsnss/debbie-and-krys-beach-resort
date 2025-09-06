@@ -10,8 +10,6 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],
             ssr: 'resources/js/ssr.tsx',
             refresh: true,
-            buildDirectory: '../build',
-            hotFile: '../build/.vite/hot',
         }),
         react(),
         tailwindcss(),
@@ -21,10 +19,5 @@ export default defineConfig({
     ],
     esbuild: {
         jsx: 'automatic',
-    },
-    build: {
-        outDir: '../build',
-        emptyOutDir: true,
-        manifest: true,
     },
 });
