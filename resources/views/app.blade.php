@@ -6,6 +6,12 @@
 
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
+        <!-- SEO Meta Tags -->
+        <meta name="description" content="Debbie & Krys Beach Resort, Sampaguita, Bauan, Batangas, Philippines">
+        <meta name="keywords" content="debbie, krys, beach, resort, sampaguita, bauan, batangas, philippines">
+        <meta name="author" content="Debbie & Krys Beach Resort">
+        <meta name="robots" content="index, follow">
+
         <style>
             html {
                 background-color: oklch(1 0 0);
@@ -28,5 +34,7 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+
+        <script src="https://www.google.com/recaptcha/api.js"></script>
     </body>
 </html>

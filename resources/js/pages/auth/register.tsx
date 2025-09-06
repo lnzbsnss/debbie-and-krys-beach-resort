@@ -5,6 +5,7 @@ import { LoaderCircle } from 'lucide-react';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
+import { PasswordInput } from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +13,7 @@ import AuthLayout from '@/layouts/auth-layout';
 
 export default function Register() {
     return (
-        <AuthLayout title="Create an account" description="Enter your details below to create your account">
+        <AuthLayout title="" description="">
             <Head title="Register" />
             <Form
                 {...RegisteredUserController.store.form()}
@@ -48,19 +49,19 @@ export default function Register() {
                                     autoComplete="email"
                                     name="email"
                                     placeholder="email@example.com"
+                                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input
+                                <PasswordInput
                                     id="password"
-                                    type="password"
+                                    name="password"
                                     required
                                     tabIndex={3}
                                     autoComplete="new-password"
-                                    name="password"
                                     placeholder="Password"
                                 />
                                 <InputError message={errors.password} />
@@ -68,19 +69,18 @@ export default function Register() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="password_confirmation">Confirm password</Label>
-                                <Input
+                                <PasswordInput
                                     id="password_confirmation"
-                                    type="password"
+                                    name="password_confirmation"
                                     required
                                     tabIndex={4}
                                     autoComplete="new-password"
-                                    name="password_confirmation"
                                     placeholder="Confirm password"
                                 />
                                 <InputError message={errors.password_confirmation} />
                             </div>
 
-                            <Button type="submit" className="mt-2 w-full" tabIndex={5}>
+                            <Button type="submit" className="mt-2 w-full cursor-pointer" tabIndex={5}>
                                 {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                 Create account
                             </Button>
@@ -89,7 +89,7 @@ export default function Register() {
                         <div className="text-center text-sm text-muted-foreground">
                             Already have an account?{' '}
                             <TextLink href={login()} tabIndex={6}>
-                                Log in
+                                Login
                             </TextLink>
                         </div>
                     </>
