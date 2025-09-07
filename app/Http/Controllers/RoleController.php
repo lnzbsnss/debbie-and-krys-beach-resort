@@ -21,8 +21,14 @@ class RoleController extends Controller
 
                 switch ($routeName) {
                     case 'roles.index':
-                        if (!$user->hasPermissionTo('role view')) {
-                            abort(403, 'Unauthorized: Missing role view permission');
+                        if (!$user->hasPermissionTo('role show')) {
+                            abort(403, 'Unauthorized: Missing role show permission');
+                        }
+                        break;
+
+                    case 'roles.show':
+                        if (!$user->hasPermissionTo('role show')) {
+                            abort(403, 'Unauthorized: Missing role show permission');
                         }
                         break;
 
@@ -65,35 +71,27 @@ class RoleController extends Controller
             });
         }
 
-        // Apply column filters
+        // Apply simple filters (not computed ones)
         if ($request->filled('filters')) {
             $filters = $request->filters;
 
             if (isset($filters['display_name']) && !empty($filters['display_name'])) {
-                $query->whereIn('name', array_map('strtolower', $filters['display_name']));
-            }
-
-            if (isset($filters['users_count_text']) && !empty($filters['users_count_text'])) {
-                $query->where(function ($q) use ($filters) {
-                    foreach ($filters['users_count_text'] as $countText) {
-                        if ($countText === 'No users') {
-                            $q->orHaving('users_count', '=', 0);
-                        } elseif ($countText === '1 user') {
-                            $q->orHaving('users_count', '=', 1);
-                        } elseif (preg_match('/(\d+) users/', $countText, $matches)) {
-                            $count = intval($matches[1]);
-                            $q->orHaving('users_count', '=', $count);
-                        } elseif ($countText === '6+ users') {
-                            $q->orHaving('users_count', '>', 5);
-                        }
-                    }
-                });
+                $nameFilters = is_array($filters['display_name'])
+                    ? $filters['display_name']
+                    : explode(',', $filters['display_name']);
+                $query->whereIn('name', array_map('strtolower', array_filter($nameFilters)));
             }
         }
 
         // Apply sorting
         $sortField = $request->get('sort', 'name');
         $sortDirection = $request->get('direction', 'asc');
+
+        $allowedSortFields = ['name', 'display_name', 'users_count', 'users_count_text', 'created_at', 'updated_at'];
+        if (!in_array($sortField, $allowedSortFields) || !is_string($sortField)) {
+            $sortField = 'name';
+        }
+        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
 
         if ($sortField === 'users_count' || $sortField === 'users_count_text') {
             $query->orderBy('users_count', $sortDirection);
@@ -103,12 +101,43 @@ class RoleController extends Controller
             $query->orderBy($sortField, $sortDirection);
         }
 
-        // Get page size
+        // Get ALL data first
+        $allRoles = $query->get();
+
+        // Apply users_count_text filter on the collection
+        if ($request->filled('filters.users_count_text')) {
+            $countFilters = is_array($request->input('filters.users_count_text'))
+                ? $request->input('filters.users_count_text')
+                : explode(',', $request->input('filters.users_count_text'));
+
+            $allRoles = $allRoles->filter(function ($role) use ($countFilters) {
+                $userCountText = $this->getUsersCountText($role->users_count);
+                return in_array($userCountText, array_filter($countFilters));
+            });
+        }
+
+        // Manual pagination
         $perPage = $request->get('per_page', 10);
-        $roles = $query->paginate($perPage)->withQueryString();
+        $currentPage = $request->get('page', 1);
+        $total = $allRoles->count();
+        $offset = ($currentPage - 1) * $perPage;
+        $items = $allRoles->slice($offset, $perPage)->values();
+
+        // Create pagination object
+        $roles = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'page',
+            ]
+        );
+        $roles->withQueryString();
 
         // Transform data
-        $transformedRoles = $roles->through(function ($role) {
+        $transformedRoles = collect($roles->items())->map(function ($role) {
             return [
                 'id' => $role->id,
                 'name' => $role->name,
@@ -119,11 +148,24 @@ class RoleController extends Controller
                 'permissions_count' => $role->permissions->count(),
                 'permissions_text' => $role->permissions->pluck('name')->implode(', '),
                 'can_edit' => $role->name !== 'admin',
-                'can_delete' => $role->name !== 'admin' && $role->users_count === 0,
+                'can_delete' => !in_array($role->name, ['admin', 'staff', 'customer']) && $role->users_count === 0,
                 'created_at' => $role->created_at->format('M d, Y'),
                 'updated_at' => $role->updated_at->format('M d, Y'),
             ];
         });
+
+        // Update the pagination object with transformed data
+        $roles = new \Illuminate\Pagination\LengthAwarePaginator(
+            $transformedRoles,
+            $total,
+            $perPage,
+            $currentPage,
+            [
+                'path' => $request->url(),
+                'pageName' => 'page',
+            ]
+        );
+        $roles->withQueryString();
 
         // Group permissions by category for the permission selector
         $permissions = Permission::all()->groupBy(function ($permission) {
@@ -145,7 +187,7 @@ class RoleController extends Controller
         $filterOptions = $this->getFilterOptions();
 
         return Inertia::render('roles/index', [
-            'roles' => $transformedRoles,
+            'roles' => $roles,
             'permissions' => $permissions,
             'filterOptions' => $filterOptions,
             'queryParams' => $request->only(['search', 'sort', 'direction', 'per_page', 'filters']),

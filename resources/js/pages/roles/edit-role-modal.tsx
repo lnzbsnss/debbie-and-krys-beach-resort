@@ -1,4 +1,3 @@
-// resources/js/Pages/Roles/EditRoleModal.tsx
 import { useEffect } from 'react';
 import { useForm } from '@inertiajs/react';
 import {

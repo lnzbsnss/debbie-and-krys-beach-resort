@@ -18,14 +18,20 @@ class PermissionRoleUserSeeder extends Seeder
             // global
             'global access',
 
+            // customer
+            'customer access',
+
+            // staff
+            'staff access',
+
             // user
-            'user view',
+            'user show',
             'user create',
             'user edit',
             'user delete',
 
             // role
-            'role view',
+            'role show',
             'role create',
             'role edit',
             'role delete',
@@ -48,17 +54,33 @@ class PermissionRoleUserSeeder extends Seeder
         // $adminRole->givePermissionTo(Permission::all());
         $adminRole->givePermissionTo('global access');
 
-        // Create admin user with all fields
-        $user = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
+        // Create admin user
+        $adminUser = User::firstOrCreate(
+            ['email' => 'admin@debbieandkrysbeachresort.com'],
             [
                 'email_verified_at' => now(),
-                'name' => 'administrator',
-                'password' => Hash::make('password'),
+                'name' => 'admin',
+                'password' => Hash::make('P@ssw0rd'),
                 'status' => 'active',
             ]
         );
 
-        $user->assignRole($adminRole);
+        $adminUser->assignRole($adminRole);
+
+        // Create staff role
+        $staffRole = Role::firstOrCreate([
+            'name' => 'staff',
+            'guard_name' => 'web'
+        ]);
+
+        $staffRole->givePermissionTo('staff access');
+
+        // Create customer role
+        $customerRole = Role::firstOrCreate([
+            'name' => 'customer',
+            'guard_name' => 'web'
+        ]);
+
+        $customerRole->givePermissionTo('customer access');
     }
 }

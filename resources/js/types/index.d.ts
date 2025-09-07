@@ -1,5 +1,3 @@
-// resources/js/types/index.ts (update your existing PageProps interface)
-
 export interface Auth {
     user: User;
 }
@@ -19,9 +17,9 @@ export interface NavItem {
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    requiredPermissions?: string[];
 }
 
-// Add Flash interface
 export interface Flash {
     success?: string;
     error?: string;
@@ -37,6 +35,12 @@ export interface SharedData {
     [key: string]: unknown;
 }
 
+export interface PageProps extends SharedData {
+    flash?: Flash;
+    [key: string]: unknown;
+}
+
+// User
 export interface User {
     id: number;
     name: string;
@@ -47,16 +51,47 @@ export interface User {
     status: string;
     created_at: string;
     updated_at: string;
-    roles?: string[];
-    permissions?: string[];
+    roles: string[];
+    permissions: string[];
     [key: string]: unknown;
 }
 
-export interface PageProps extends SharedData {
-    flash?: Flash;
-    [key: string]: unknown;
+export interface UserData extends User {
+    status_label: string;
+    email_verified: string;
+    email_verified_status: 'verified' | 'unverified';
+    roles_text: string;
+    roles_count: number;
+
+    can_edit: boolean;
+    can_delete: boolean;
+    is_admin: boolean;
 }
 
+export interface UserFormData {
+    name: string;
+    email: string;
+    password?: string;
+    password_confirmation?: string;
+    status: string;
+    email_verified_at: boolean;
+    roles: string[];
+}
+
+export interface UserRole {
+    id: number;
+    name: string;
+    label: string;
+}
+
+export interface UserIndexProps extends PageProps {
+    users: PaginatedData<UserData>;
+    availableRoles: UserRole[];
+    filterOptions: FilterOptions;
+    queryParams: Partial<DataTableState>;
+}
+
+// Spatie Role Permission
 export interface Role {
     id: number;
     name: string;
@@ -88,6 +123,14 @@ export interface RoleFormData {
     permissions: string[];
 }
 
+export interface RoleIndexProps extends PageProps {
+    roles: PaginatedData<Role>;
+    permissions: PermissionCategory[];
+    filterOptions: FilterOptions;
+    queryParams: Partial<DataTableState>;
+}
+
+// Datatable
 export interface DataTableColumn {
     key: string;
     label: string;
@@ -130,11 +173,4 @@ export interface PaginatedData<T> {
     total: number;
     from: number;
     to: number;
-}
-
-export interface RoleIndexProps extends PageProps {
-    roles: PaginatedData<Role>;
-    permissions: PermissionCategory[];
-    filterOptions: FilterOptions;
-    queryParams: Partial<DataTableState>;
 }
