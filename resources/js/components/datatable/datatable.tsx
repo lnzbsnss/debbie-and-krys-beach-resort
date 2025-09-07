@@ -53,6 +53,7 @@ interface DataTableProps<T> {
     title?: string;
     createButton?: React.ReactNode;
     exportFileName?: string;
+    rawData?: Record<string, any>[];
 }
 
 export default function DataTable<T extends Record<string, any>>({
@@ -64,7 +65,8 @@ export default function DataTable<T extends Record<string, any>>({
     children,
     title,
     createButton,
-    exportFileName = 'export'
+    exportFileName = 'export',
+    rawData
 }: DataTableProps<T>) {
     const [state, setState] = useState<DataTableState>({
         search: queryParams.search || '',
@@ -97,33 +99,35 @@ export default function DataTable<T extends Record<string, any>>({
         const newState = { ...state, ...updates };
         setState(newState);
 
-        // Update URL with new state
-        const queryString = new URLSearchParams();
+        // Update URL with new state using Inertia router
+        const queryParams: Record<string, any> = {};
 
-        if (newState.search) queryString.set('search', newState.search);
-        if (newState.sort) queryString.set('sort', newState.sort);
-        if (newState.direction !== 'asc') queryString.set('direction', newState.direction);
-        if (newState.perPage !== 10) queryString.set('per_page', newState.perPage.toString());
-        if (newState.page !== 1) queryString.set('page', newState.page.toString());
+        if (newState.search) queryParams.search = newState.search;
+        if (newState.sort && typeof newState.sort === 'string') queryParams.sort = newState.sort; // Ensure it's a string
+        if (newState.direction !== 'asc') queryParams.direction = newState.direction;
+        if (newState.perPage !== 10) queryParams.per_page = newState.perPage;
+        if (newState.page !== 1) queryParams.page = newState.page;
 
-        // Add filters to query string
+        // Add filters to query params
         if (Object.keys(newState.filters).length > 0) {
             Object.entries(newState.filters).forEach(([key, values]) => {
                 if (values.length > 0) {
-                    queryString.set(`filters[${key}]`, values.join(','));
+                    queryParams[`filters[${key}]`] = values;
                 }
             });
         }
 
-        router.get(window.location.pathname, Object.fromEntries(queryString), {
+        router.get(window.location.pathname, queryParams, {
             preserveState: true,
             preserveScroll: true,
         });
     };
 
     const handleSort = (column: string) => {
-        const newDirection = state.sort === column && state.direction === 'asc' ? 'desc' : 'asc';
-        updateState({ sort: column, direction: newDirection, page: 1 });
+        // Ensure we're working with a string, not a function
+        const sortColumn = typeof column === 'string' ? column : '';
+        const newDirection = state.sort === sortColumn && state.direction === 'asc' ? 'desc' : 'asc';
+        updateState({ sort: sortColumn, direction: newDirection, page: 1 });
     };
 
     const handleFilterChange = (column: string, values: string[]) => {
@@ -263,6 +267,7 @@ export default function DataTable<T extends Record<string, any>>({
                             data={data.data}
                             columns={visibleColumns}
                             fileName={exportFileName}
+                            rawData={rawData}
                         />
 
                         {/* Per Page */}

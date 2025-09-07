@@ -1,33 +1,27 @@
 import { useState } from 'react';
 import { Head } from '@inertiajs/react';
-import { Plus, Edit, Trash2, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RoleIndexProps, Role, DataTableColumn } from '@/types';
 import DataTable from '@/components/datatable/datatable';
 import CreateRoleModal from './create-role-modal';
+import ShowRoleModal from './show-role-modal';
 import EditRoleModal from './edit-role-modal';
 import DeleteRoleModal from './delete-role-modal';
-import { toast } from 'sonner';
-import { useEffect } from 'react';
 
 export default function Index({ roles, permissions, filterOptions, queryParams, ...props }: RoleIndexProps) {
     const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [showModalOpen, setShowModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
-    useEffect(() => {
-        const message = props.flash?.success || props.flash?.error;
-        if (message) {
-            if (props.flash?.success) {
-                toast.success(message);
-            } else {
-                toast.error(message);
-            }
-        }
-    }, [props.flash]);
+    const handleShow = (role: Role) => {
+        setSelectedRole(role);
+        setShowModalOpen(true);
+    };
 
     const handleEdit = (role: Role) => {
         setSelectedRole(role);
@@ -40,6 +34,8 @@ export default function Index({ roles, permissions, filterOptions, queryParams, 
     };
 
     const canCreateRole = props.auth.user.permissions?.includes('role create') || props.auth.user.permissions?.includes('global access');
+    const canShowRole = props.auth.user?.permissions?.includes('role show') ||
+        props.auth.user?.permissions?.includes('global access');
     const canEditRole = props.auth.user.permissions?.includes('role edit') || props.auth.user.permissions?.includes('global access');
     const canDeleteRole = props.auth.user.permissions?.includes('role delete') || props.auth.user.permissions?.includes('global access');
 
@@ -48,7 +44,7 @@ export default function Index({ roles, permissions, filterOptions, queryParams, 
             key: 'display_name',
             label: 'Role Name',
             sortable: true,
-            searchable: true,
+            searchable: false,
             filterable: true,
             width: '200px',
         },
@@ -117,6 +113,14 @@ export default function Index({ roles, permissions, filterOptions, queryParams, 
         </Button>
     ) : null;
 
+    const rawRolesData = roles.data.map(role => ({
+        name: role.display_name,
+        permissions: role.permissions_text,
+        users_count: role.users_count_text,
+        created_at: role.created_at,
+        updated_at: role.updated_at,
+    }));
+
     return (
         <AppLayout>
             <Head title="Roles" />
@@ -131,9 +135,20 @@ export default function Index({ roles, permissions, filterOptions, queryParams, 
                         title="Roles Management"
                         createButton={createButton}
                         exportFileName="roles"
+                        rawData={rawRolesData}
                     >
                         {(role: Role) => (
                             <div className="flex items-center justify-end gap-2">
+                                {canShowRole && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleShow(role)}
+                                        title="View user details"
+                                    >
+                                        <Eye className="w-4 h-4" />
+                                    </Button>
+                                )}
                                 {canEditRole && role.can_edit && (
                                     <Button
                                         variant="outline"
@@ -171,9 +186,13 @@ export default function Index({ roles, permissions, filterOptions, queryParams, 
                 onOpenChange={setCreateModalOpen}
                 permissions={permissions}
             />
-
             {selectedRole && (
                 <>
+                    <ShowRoleModal
+                        open={showModalOpen}
+                        onOpenChange={setShowModalOpen}
+                        role={selectedRole}
+                    />
                     <EditRoleModal
                         open={editModalOpen}
                         onOpenChange={setEditModalOpen}

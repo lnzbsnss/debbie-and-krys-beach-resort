@@ -1,5 +1,4 @@
 import '../css/app.css';
-
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
@@ -14,18 +13,26 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <>
+                <App {...props} />
+                <Toaster
+                    position="top-right"
+                    richColors
+                    closeButton
+                    expand
+                    toastOptions={{
+                        duration: 5000,
+                        className: 'rounded-lg border shadow-lg',
+                    }}
+                />
+            </>
+        );
     },
     progress: {
         color: '#4B5563',
     },
 });
-
-<Toaster
-    position="top-right"
-    richColors
-    closeButton
-/>
 
 // This will set light mode on load...
 initializeTheme();

@@ -14,30 +14,48 @@ interface DataTableExportProps<T> {
     data: T[];
     columns: DataTableColumn[];
     fileName: string;
+    rawData?: T[];
 }
 
 export default function DataTableExport<T extends Record<string, any>>({
     data,
     columns,
-    fileName
+    fileName,
+    rawData
 }: DataTableExportProps<T>) {
 
     const exportData = (format: 'csv' | 'excel') => {
-        // Prepare data for export
-        const exportData = data.map(row => {
+        // Use rawData if provided, otherwise fall back to data
+        const dataToExport = rawData || data;
+
+        // Prepare data for export with only exportable columns
+        const exportableData = dataToExport.map(row => {
             const exportRow: Record<string, any> = {};
             columns.forEach(column => {
-                // Clean up the data for export (remove HTML, get plain text)
                 let value = row[column.key];
 
-                // Handle different data types
+                // Handle different data types and convert display components to text
+                if (column.key.includes('_display')) {
+                    // For display columns, get the raw value
+                    const baseKey = column.key.replace('_display', '');
+                    value = row[baseKey] || row[column.key];
+                }
+
+                // Clean up the data for export
                 if (typeof value === 'string') {
                     // Remove HTML tags if any
                     value = value.replace(/<[^>]*>/g, '');
                 } else if (Array.isArray(value)) {
                     value = value.join(', ');
                 } else if (typeof value === 'object' && value !== null) {
-                    value = JSON.stringify(value);
+                    // Skip React components and complex objects
+                    if (value.$$typeof || value._owner) {
+                        value = ''; // Skip React components
+                    } else {
+                        value = JSON.stringify(value);
+                    }
+                } else if (value === null || value === undefined) {
+                    value = '';
                 }
 
                 exportRow[column.label] = value;
@@ -46,9 +64,9 @@ export default function DataTableExport<T extends Record<string, any>>({
         });
 
         if (format === 'csv') {
-            exportToCSV(exportData, fileName);
+            exportToCSV(exportableData, fileName);
         } else {
-            exportToExcel(exportData, fileName);
+            exportToExcel(exportableData, fileName);
         }
     };
 

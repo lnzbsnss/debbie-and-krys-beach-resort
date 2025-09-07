@@ -22,5 +22,14 @@ Route::middleware(['auth', 'verified', 'check.user.status'])->group(function () 
     Route::resource('roles', RoleController::class)->except(['create', 'show', 'edit']);
 });
 
+// In web.php
+Route::get('/test-google-config', function() {
+    return [
+        'client_id' => config('services.google.client_id'),
+        'client_secret' => config('services.google.client_secret') ? 'Set' : 'Not set',
+        'redirect' => config('services.google.redirect'),
+    ];
+});
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

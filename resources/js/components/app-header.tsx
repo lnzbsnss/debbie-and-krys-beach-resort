@@ -1,3 +1,4 @@
+// Update your AppHeader component
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,28 +9,31 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { LayoutGrid, Users, Shield, Menu, Search } from 'lucide-react';
+import { useMemo } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
-const mainNavItems: NavItem[] = [
+const allNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
+        requiredPermissions: [],
     },
     {
         title: 'User',
         href: '/users',
         icon: Users,
+        requiredPermissions: ['user show', 'global access'],
     },
     {
         title: 'Role',
         href: '/roles',
         icon: Shield,
+        requiredPermissions: ['role show', 'global access'],
     },
 ];
 
@@ -43,6 +47,22 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+
+    // Filter navigation items based on user permissions
+    const mainNavItems = useMemo(() => {
+        return allNavItems.filter(item => {
+            // If no permissions required, show the item
+            if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
+                return true;
+            }
+
+            // Check if user has any of the required permissions
+            return item.requiredPermissions.some(permission =>
+                auth.user.permissions?.includes(permission)
+            );
+        });
+    }, [auth.user.permissions]);
+
     return (
         <>
             <div className="border-b border-sidebar-border/80">
@@ -76,7 +96,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         </Sheet>
                     </div>
 
-                    <Link href={dashboard()} prefetch className="flex items-center space-x-2">
+                    <Link href='/dashboard' prefetch className="flex items-center space-x-2">
                         <AppLogo />
                     </Link>
 
