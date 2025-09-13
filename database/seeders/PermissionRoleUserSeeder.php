@@ -18,14 +18,20 @@ class PermissionRoleUserSeeder extends Seeder
             // global
             'global access',
 
+            // customer
+            'customer access',
+
+            // staff
+            'staff access',
+
             // user
-            'user view',
+            'user show',
             'user create',
             'user edit',
             'user delete',
 
             // role
-            'role view',
+            'role show',
             'role create',
             'role edit',
             'role delete',
@@ -48,17 +54,59 @@ class PermissionRoleUserSeeder extends Seeder
         // $adminRole->givePermissionTo(Permission::all());
         $adminRole->givePermissionTo('global access');
 
-        // Create admin user with all fields
-        $user = User::firstOrCreate(
+        // Create admin user
+        $adminUser = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'email_verified_at' => now(),
-                'name' => 'administrator',
+                'name' => 'admin',
                 'password' => Hash::make('password'),
                 'status' => 'active',
             ]
         );
 
-        $user->assignRole($adminRole);
+        $adminUser->assignRole($adminRole);
+
+        // Create staff role
+        $staffRole = Role::firstOrCreate([
+            'name' => 'staff',
+            'guard_name' => 'web'
+        ]);
+
+        $staffRole->givePermissionTo('staff access');
+
+        // Create staff user
+        $staffUser = User::firstOrCreate(
+            ['email' => 'staff@example.com'],
+            [
+                'email_verified_at' => now(),
+                'name' => 'staff',
+                'password' => Hash::make('password'),
+                'status' => 'active',
+            ]
+        );
+
+        $staffUser->assignRole($staffRole);
+
+        // Create customer role
+        $customerRole = Role::firstOrCreate([
+            'name' => 'customer',
+            'guard_name' => 'web'
+        ]);
+
+        $customerRole->givePermissionTo('customer access');
+
+        // Create customer user
+        $customerUser = User::firstOrCreate(
+            ['email' => 'customer@example.com'],
+            [
+                'email_verified_at' => now(),
+                'name' => 'customer',
+                'password' => Hash::make('password'),
+                'status' => 'active',
+            ]
+        );
+
+        $customerUser->assignRole($customerRole);
     }
 }

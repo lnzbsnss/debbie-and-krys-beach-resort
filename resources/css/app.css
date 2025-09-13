@@ -83,14 +83,16 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.87 0 0);
+
+    /* Ocean Blues Sidebar Palette - Complements the beach resort logo */
+    --sidebar: oklch(0.4 0.15 240);                       /* Deep ocean blue - main sidebar */
+    --sidebar-foreground: oklch(0.95 0.02 240);           /* Very light blue-white text */
+    --sidebar-primary: oklch(0.35 0.18 230);              /* Darker navy for primary elements */
+    --sidebar-primary-foreground: oklch(1 0 0);           /* Pure white text */
+    --sidebar-accent: oklch(0.5 0.12 250);                /* Lighter ocean blue for accents */
+    --sidebar-accent-foreground: oklch(0.95 0.02 240);    /* Light blue-white text */
+    --sidebar-border: oklch(0.3 0.15 230);                /* Dark navy border */
+    --sidebar-ring: oklch(0.6 0.15 240);                  /* Brighter blue for focus rings */
 }
 
 @layer base {

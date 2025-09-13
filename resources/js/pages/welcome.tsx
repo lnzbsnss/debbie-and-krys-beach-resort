@@ -1,7 +1,7 @@
 import { dashboard, login, register } from '@/routes';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Phone, Mail, Facebook } from 'lucide-react';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -18,7 +18,7 @@ export default function Welcome() {
                         {auth.user ? (
                             <Link
                                 href={dashboard()}
-                                className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a]"
+                                className="inline-block rounded-sm border border-blue-200 px-5 py-1.5 text-sm leading-normal text-blue-700 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
                             >
                                 Dashboard
                             </Link>
@@ -26,13 +26,13 @@ export default function Welcome() {
                             <>
                                 <Link
                                     href={login()}
-                                    className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035]"
+                                    className="inline-flex items-center justify-center px-5 py-1.5 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 hover:border-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
                                 >
                                     Login
                                 </Link>
                                 <Link
                                     href={register()}
-                                    className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a]"
+                                    className="inline-block rounded-sm border border-blue-200 px-5 py-1.5 text-sm leading-normal text-blue-700 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
                                 >
                                     Register
                                 </Link>
@@ -42,13 +42,13 @@ export default function Welcome() {
                 </header>
                 <div className="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
                     <main className="flex w-full max-w-[335px] flex-col-reverse lg:max-w-6xl lg:flex-row lg:items-center lg:gap-12">
-                        <div className="relative -mb-px aspect-[335/376] w-full shrink-0 overflow-hidden rounded-t-lg bg-[#fff2f2] lg:mb-0 lg:aspect-[4/5] lg:w-[480px] lg:rounded-lg lg:shadow-2xl">
+                        <div className="relative -mb-px aspect-[335/376] w-full shrink-0 overflow-hidden rounded-t-lg bg-blue-50 lg:mb-0 lg:aspect-[4/5] lg:w-[480px] lg:rounded-lg lg:shadow-2xl">
                             <img
                                 src="/dk_bg.jpeg"
                                 alt="Debbie & Krys Beach Resort"
                                 className="w-full h-full object-cover transition-all duration-750"
                             />
-                            <div className="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-lg" />
+                            <div className="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(59,130,246,0.2)] lg:rounded-lg" />
                         </div>
 
                         <div className="flex flex-col items-center lg:items-start lg:flex-1 text-center lg:text-left space-y-8 py-12 lg:py-0">
@@ -56,34 +56,72 @@ export default function Welcome() {
                                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-[#1b1b18] leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                                     Debbie & Krys
                                 </h1>
-                                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-[#F53003] tracking-wide" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                                <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-blue-600 tracking-wide leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                                     Beach Resort
                                 </h2>
                             </div>
 
-                            <div className="w-24 h-px bg-gradient-to-r from-[#F53003] to-[#FF6B47]"></div>
+                            <div className="w-24 h-px bg-gradient-to-r from-blue-600 to-blue-400"></div>
 
-                            <div className="space-y-3 text-base lg:text-lg text-[#4a4a47]" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                            <div className="space-y-3 text-base lg:text-lg text-[#4a4a47] font-medium" style={{ fontFamily: 'Instrument Sans, sans-serif' }}>
                                 <div className="flex items-center gap-3">
-                                    <MapPin className="w-5 h-5 text-[#F53003] flex-shrink-0" />
-                                    <span>Sampaguita, Bauan, Batangas, Philippines</span>
+                                    <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                    <a
+                                        href="https://maps.app.goo.gl/Fvkn2SNiKCa1pXsp8"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                        title="Open in Google Maps"
+                                    >
+                                        Sampaguita, Bauan, Batangas, Philippines
+                                    </a>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <Phone className="w-5 h-5 text-[#F53003] flex-shrink-0" />
-                                    <span>0927 821 0836</span>
+                                    <Phone className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                    <a
+                                        href="tel:+639278210836"
+                                        className="font-mono tracking-wider hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                        title="Click to call"
+                                    >
+                                        0927 821 0836
+                                    </a>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <Mail className="w-5 h-5 text-[#F53003] flex-shrink-0" />
-                                    <span>debbiekrysb@gmail.com</span>
+                                    <Mail className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                    <a
+                                        href="mailto:debbiekrysb@gmail.com"
+                                        className="break-all hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                        title="Click to send email"
+                                    >
+                                        debbiekrysb@gmail.com
+                                    </a>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Facebook className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                    <a
+                                        href="https://www.facebook.com/DebbieAndKrysBeachResort/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                        title="Visit our Facebook page"
+                                    >
+                                        Debbie & Krys Beach Resort
+                                    </a>
                                 </div>
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                 <Link
                                     href='#'
-                                    className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-[#F53003] border border-[#F53003] rounded-md hover:bg-[#E02A00] hover:border-[#E02A00] transition-colors duration-200"
+                                    className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-blue-600 border border-blue-600 rounded-md hover:bg-blue-700 hover:border-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md hover:shadow-lg"
                                 >
                                     Book Now
+                                </Link>
+                                <Link
+                                    href='#'
+                                    className="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-blue-700 bg-transparent border border-blue-200 rounded-md hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+                                >
+                                    View Gallery
                                 </Link>
                             </div>
                         </div>

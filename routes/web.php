@@ -19,7 +19,16 @@ Route::middleware(['auth', 'verified', 'check.user.status'])->group(function () 
     })->name('dashboard');
 
     Route::resource('users', UserController::class);
-    Route::resource('roles', RoleController::class);
+    Route::resource('roles', RoleController::class)->except(['create', 'show', 'edit']);
+});
+
+// In web.php
+Route::get('/test-google-config', function() {
+    return [
+        'client_id' => config('services.google.client_id'),
+        'client_secret' => config('services.google.client_secret') ? 'Set' : 'Not set',
+        'redirect' => config('services.google.redirect'),
+    ];
 });
 
 require __DIR__.'/settings.php';
