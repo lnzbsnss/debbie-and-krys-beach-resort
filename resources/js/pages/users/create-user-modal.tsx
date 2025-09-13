@@ -78,8 +78,7 @@ export default function CreateUserModal({ open, onOpenChange, availableRoles }: 
 
     const { isValid: isPasswordValid } = validatePassword(data.password);
     const isPasswordMatch = data.password === data.password_confirmation;
-    const canSubmit = data.name && data.email && data.password && data.password_confirmation &&
-                     isPasswordValid && isPasswordMatch && !processing;
+    const canSubmit = data.name && data.email && data.password && data.password_confirmation && isPasswordValid && isPasswordMatch && !processing;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

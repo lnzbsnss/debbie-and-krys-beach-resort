@@ -56,11 +56,11 @@ class PermissionRoleUserSeeder extends Seeder
 
         // Create admin user
         $adminUser = User::firstOrCreate(
-            ['email' => 'admin@debbieandkrysbeachresort.com'],
+            ['email' => 'admin@example.com'],
             [
                 'email_verified_at' => now(),
                 'name' => 'admin',
-                'password' => Hash::make('P@ssw0rd'),
+                'password' => Hash::make('password'),
                 'status' => 'active',
             ]
         );
@@ -75,6 +75,19 @@ class PermissionRoleUserSeeder extends Seeder
 
         $staffRole->givePermissionTo('staff access');
 
+        // Create staff user
+        $staffUser = User::firstOrCreate(
+            ['email' => 'staff@example.com'],
+            [
+                'email_verified_at' => now(),
+                'name' => 'staff',
+                'password' => Hash::make('password'),
+                'status' => 'active',
+            ]
+        );
+
+        $staffUser->assignRole($staffRole);
+
         // Create customer role
         $customerRole = Role::firstOrCreate([
             'name' => 'customer',
@@ -82,5 +95,18 @@ class PermissionRoleUserSeeder extends Seeder
         ]);
 
         $customerRole->givePermissionTo('customer access');
+
+        // Create customer user
+        $customerUser = User::firstOrCreate(
+            ['email' => 'customer@example.com'],
+            [
+                'email_verified_at' => now(),
+                'name' => 'customer',
+                'password' => Hash::make('password'),
+                'status' => 'active',
+            ]
+        );
+
+        $customerUser->assignRole($customerRole);
     }
 }
