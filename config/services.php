@@ -43,4 +43,9 @@ return [
             'verify' => env('CURL_CA_BUNDLE_DISABLE', false) ? false : true,
         ],
     ],
+
+    'recaptcha' => [
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+    ],
 ];

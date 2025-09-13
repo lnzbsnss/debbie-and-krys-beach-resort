@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import AuthenticatedSessionController from '@/actions/App/Http/Controllers/Auth/AuthenticatedSessionController';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -11,6 +12,7 @@ import { register } from '@/routes';
 import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useRecaptcha } from '@/hooks/use-recaptcha';
 
 interface LoginProps {
     status?: string;
@@ -18,17 +20,67 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
+    const { executeRecaptcha } = useRecaptcha();
+    const [recaptchaToken, setRecaptchaToken] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleGoogleLogin = () => {
         window.location.href = '/auth/google';
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        if (isSubmitting) {
+            e.preventDefault();
+            return;
+        }
+
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            // Get reCAPTCHA token
+            const token = await executeRecaptcha('login');
+            if (token) {
+                setRecaptchaToken(token);
+
+                // Small delay to ensure state is updated, then submit
+                setTimeout(() => {
+                    const form = e.target as HTMLFormElement;
+                    const formData = new FormData(form);
+                    formData.set('recaptcha_token', token);
+
+                    // Convert FormData to regular object for Inertia
+                    const data: Record<string, any> = {};
+                    formData.forEach((value, key) => {
+                        data[key] = value;
+                    });
+
+                    // Submit using Inertia's router
+                    window.location.href = form.action;
+                    form.submit();
+                }, 10);
+            }
+        } catch (error) {
+            console.error('reCAPTCHA error:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
         <AuthLayout title="" description="">
             <Head title="Login" />
 
-            <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
+            <Form
+                {...AuthenticatedSessionController.store.form()}
+                resetOnSuccess={['password']}
+                className="flex flex-col gap-6"
+                onSubmit={handleSubmit}
+            >
                 {({ processing, errors }) => (
                     <>
+                        <input type="hidden" name="recaptcha_token" value={recaptchaToken} />
+
                         <div className="grid gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email address</Label>
@@ -70,11 +122,18 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 <Label htmlFor="remember">Remember me</Label>
                             </div>
 
-                            <Button type="submit" className="mt-4 w-full cursor-pointer" tabIndex={4} disabled={processing}>
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                            <Button
+                                type="submit"
+                                className="mt-4 w-full cursor-pointer"
+                                tabIndex={4}
+                                disabled={processing || isSubmitting}
+                            >
+                                {(processing || isSubmitting) && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                 Login
                             </Button>
                         </div>
+
+                        <InputError message={errors.recaptcha_token} />
 
                         {/* Google Login Section */}
                         <div className="relative">

@@ -3,6 +3,7 @@ import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/Regist
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useRecaptcha } from '@/hooks/use-recaptcha';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -17,6 +18,9 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+    const [recaptchaToken, setRecaptchaToken] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { executeRecaptcha } = useRecaptcha();
 
     const handleGoogleLogin = () => {
         window.location.href = '/auth/google';
@@ -24,6 +28,38 @@ export default function Register() {
 
     const { isValid: isPasswordValid } = validatePassword(password);
     const isPasswordMatch = password === passwordConfirmation;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        if (isSubmitting || !isPasswordValid || !isPasswordMatch) {
+            e.preventDefault();
+            return;
+        }
+
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            // Get reCAPTCHA token
+            const token = await executeRecaptcha('register');
+            if (token) {
+                setRecaptchaToken(token);
+
+                // Small delay to ensure state is updated, then submit
+                setTimeout(() => {
+                    const form = e.target as HTMLFormElement;
+                    const formData = new FormData(form);
+                    formData.set('recaptcha_token', token);
+
+                    // Submit the form
+                    form.submit();
+                }, 10);
+            }
+        } catch (error) {
+            console.error('reCAPTCHA error:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <AuthLayout title="" description="">
@@ -33,9 +69,12 @@ export default function Register() {
                 resetOnSuccess={['password', 'password_confirmation']}
                 disableWhileProcessing
                 className="flex flex-col gap-6"
+                onSubmit={handleSubmit}
             >
                 {({ processing, errors }) => (
                     <>
+                        <input type="hidden" name="recaptcha_token" value={recaptchaToken} />
+
                         <div className="grid gap-6">
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Name</Label>
@@ -115,12 +154,14 @@ export default function Register() {
                                 type="submit"
                                 className="mt-2 w-full cursor-pointer"
                                 tabIndex={5}
-                                disabled={processing || !isPasswordValid || !isPasswordMatch}
+                                disabled={processing || isSubmitting || !isPasswordValid || !isPasswordMatch}
                             >
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
+                                {(processing || isSubmitting) && <LoaderCircle className="h-4 w-4 animate-spin" />}
                                 Register
                             </Button>
                         </div>
+
+                        <InputError message={errors.recaptcha_token} />
 
                         {/* Google Login Section */}
                         <div className="relative">
