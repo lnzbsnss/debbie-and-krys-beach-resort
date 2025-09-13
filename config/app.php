@@ -123,4 +123,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | SSL Verification Settings
+    |--------------------------------------------------------------------------
+    */
+
+    'disable_ssl_verify' => env('APP_DISABLE_SSL_VERIFY', false),
+    'local_disable_ssl' => env('APP_LOCAL_DISABLE_SSL', false),
+    'curl_ca_bundle_path' => env('CURL_CA_BUNDLE_PATH', null),
+
 ];

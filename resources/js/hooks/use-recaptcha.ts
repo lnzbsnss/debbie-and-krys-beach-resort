@@ -8,26 +8,36 @@ declare global {
 
 export const useRecaptcha = () => {
     const executeRecaptcha = useCallback(async (action: string): Promise<string | null> => {
-        return new Promise((resolve) => {
-            if (typeof window !== 'undefined' && window.grecaptcha) {
+        return new Promise((resolve, reject) => {
+            if (!import.meta.env.VITE_RECAPTCHA_SITE_KEY) {
+                resolve(null);
+                return;
+            }
+
+            if (typeof window !== 'undefined' && window.grecaptcha && window.grecaptcha.ready) {
                 window.grecaptcha.ready(() => {
                     window.grecaptcha
                         .execute(import.meta.env.VITE_RECAPTCHA_SITE_KEY, { action })
                         .then((token: string) => {
                             resolve(token);
                         })
-                        .catch(() => {
-                            resolve(null);
+                        .catch((error: any) => {
+                            console.error('reCAPTCHA execution failed:', error);
+                            reject(error);
                         });
                 });
             } else {
-                resolve(null);
+                console.error('reCAPTCHA not loaded or not ready');
+                reject(new Error('reCAPTCHA not available'));
             }
         });
     }, []);
 
     const loadRecaptcha = useCallback(() => {
-        if (!import.meta.env.VITE_RECAPTCHA_SITE_KEY) return;
+        if (!import.meta.env.VITE_RECAPTCHA_SITE_KEY) {
+            console.warn('VITE_RECAPTCHA_SITE_KEY not set in environment variables');
+            return;
+        }
 
         const existingScript = document.getElementById('recaptcha-script');
         if (existingScript) return;
@@ -36,6 +46,16 @@ export const useRecaptcha = () => {
         script.id = 'recaptcha-script';
         script.src = `https://www.google.com/recaptcha/api.js?render=${import.meta.env.VITE_RECAPTCHA_SITE_KEY}`;
         script.async = true;
+        script.defer = true;
+
+        script.onload = () => {
+            console.log('reCAPTCHA script loaded successfully');
+        };
+
+        script.onerror = (error) => {
+            console.error('Failed to load reCAPTCHA script:', error);
+        };
+
         document.head.appendChild(script);
     }, []);
 
@@ -43,5 +63,5 @@ export const useRecaptcha = () => {
         loadRecaptcha();
     }, [loadRecaptcha]);
 
-    return { executeRecaptcha };
+    return { executeRecaptcha, loadRecaptcha };
 };
