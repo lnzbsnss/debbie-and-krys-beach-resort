@@ -1,7 +1,7 @@
 import { dashboard, login, register } from '@/routes';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { MapPin, Phone, Mail } from 'lucide-react';
+import { MapPin, Phone, Mail, Facebook } from 'lucide-react';
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
@@ -56,7 +56,7 @@ export default function Welcome() {
                                 <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-[#1b1b18] leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                                     Debbie & Krys
                                 </h1>
-                                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-blue-600 tracking-wide" style={{ fontFamily: 'Cormorant Garamond, serif' }}>
+                                <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-blue-600 tracking-wide leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
                                     Beach Resort
                                 </h2>
                             </div>
@@ -66,15 +66,47 @@ export default function Welcome() {
                             <div className="space-y-3 text-base lg:text-lg text-[#4a4a47] font-medium" style={{ fontFamily: 'Instrument Sans, sans-serif' }}>
                                 <div className="flex items-center gap-3">
                                     <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                                    <span>Sampaguita, Bauan, Batangas, Philippines</span>
+                                    <a
+                                        href="https://maps.app.goo.gl/Fvkn2SNiKCa1pXsp8"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                        title="Open in Google Maps"
+                                    >
+                                        Sampaguita, Bauan, Batangas, Philippines
+                                    </a>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Phone className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                                    <span className="font-mono tracking-wider">0927 821 0836</span>
+                                    <a
+                                        href="tel:+639278210836"
+                                        className="font-mono tracking-wider hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                        title="Click to call"
+                                    >
+                                        0927 821 0836
+                                    </a>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Mail className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                                    <span className="break-all">debbiekrysb@gmail.com</span>
+                                    <a
+                                        href="mailto:debbiekrysb@gmail.com"
+                                        className="break-all hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                        title="Click to send email"
+                                    >
+                                        debbiekrysb@gmail.com
+                                    </a>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Facebook className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                    <a
+                                        href="https://www.facebook.com/DebbieAndKrysBeachResort/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="hover:text-blue-600 transition-colors duration-200 cursor-pointer"
+                                        title="Visit our Facebook page"
+                                    >
+                                        Debbie & Krys Beach Resort
+                                    </a>
                                 </div>
                             </div>
 

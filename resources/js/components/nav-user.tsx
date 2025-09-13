@@ -31,7 +31,7 @@ export function NavUser() {
             <SidebarMenuItem>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton size="lg" className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent">
+                        <SidebarMenuButton size="lg" className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent cursor-pointer">
                             <UserInfo user={userWithTitleCaseName} />
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
