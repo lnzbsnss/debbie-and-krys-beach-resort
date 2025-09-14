@@ -48,4 +48,11 @@ return [
         'site_key' => env('RECAPTCHA_SITE_KEY'),
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),
     ],
+
+    'github' => [
+        'repo_owner' => env('GITHUB_REPO_OWNER'),
+        'repo_name' => env('GITHUB_REPO_NAME'),
+        'access_token' => env('GITHUB_ACCESS_TOKEN'),
+        'verify_ssl' => env('GITHUB_VERIFY_SSL', true),
+    ],
 ];
