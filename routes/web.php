@@ -5,6 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\GitHubController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -17,6 +18,8 @@ Route::middleware(['auth', 'verified', 'check.user.status'])->group(function () 
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    Route::get('/api/github-updates', [GitHubController::class, 'getUpdates']);
 
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class)->except(['create', 'show', 'edit']);

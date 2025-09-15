@@ -1,3 +1,5 @@
+// resources\js\types\index.d.ts
+
 export interface Auth {
     user: User;
 }
@@ -173,4 +175,20 @@ export interface PaginatedData<T> {
     total: number;
     from: number;
     to: number;
+}
+
+export interface GitHubChangeItem {
+    text: string;
+    type: 'header' | 'item' | 'more';
+}
+
+export interface GitHubUpdate {
+    version: string;
+    date: string;
+    type: string;
+    title: string;
+    description: string;
+    changes: GitHubChangeItem[];
+    html_url: string;
+    author: string;
 }
