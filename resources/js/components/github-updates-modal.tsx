@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { GitBranch, Calendar, GitCommit, Tag, ExternalLink, Hash } from 'lucide-react';
+import { GitBranch, Calendar, GitCommit, Tag, ExternalLink, Hash, MoreHorizontal } from 'lucide-react';
 import { usePage } from '@inertiajs/react';
 import { type SharedData, type GitHubUpdate } from '@/types';
 
@@ -48,8 +48,6 @@ export function GithubUpdatesModal({ children }: GithubUpdatesModalProps) {
                 throw new Error(data.error || 'Failed to fetch updates');
             }
         } catch (error) {
-            console.error('Failed to fetch updates:', error);
-
             let errorMessage = 'Failed to load updates';
             if (error instanceof Error) {
                 errorMessage = error.message;
@@ -132,6 +130,8 @@ export function GithubUpdatesModal({ children }: GithubUpdatesModalProps) {
                                             <div key={changeIndex} className="flex items-start gap-2 text-sm">
                                                 {change.type === 'header' ? (
                                                     <Hash className="h-3 w-3 mt-1 text-muted-foreground flex-shrink-0" />
+                                                ) : change.type === 'more' ? (
+                                                    <MoreHorizontal className="h-3 w-3 mt-1 text-muted-foreground flex-shrink-0" />
                                                 ) : (
                                                     <GitCommit className="h-3 w-3 mt-1 text-muted-foreground flex-shrink-0" />
                                                 )}
