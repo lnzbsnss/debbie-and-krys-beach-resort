@@ -67,7 +67,6 @@ class GitHubController extends Controller
             });
 
         } catch (\Exception $e) {
-            Log::error('GitHub API Error: ' . $e->getMessage());
             return response()->json(['error' => 'Unable to connect to GitHub'], 500);
         }
     }
@@ -116,7 +115,7 @@ class GitHubController extends Controller
 
     private function parseChanges($body)
     {
-        if (!$body) return [['text' => 'View release notes on GitHub', 'type' => 'item']];
+        if (!$body) return [['text' => 'Release notes on GitHub', 'type' => 'more']];
 
         $changes = [];
         $lines = explode("\n", $body);
@@ -134,6 +133,17 @@ class GitHubController extends Controller
             }
         }
 
-        return array_slice($changes, 0, 10) ?: [['text' => 'View full release notes on GitHub', 'type' => 'item']];
+        // If no changes found, return default
+        if (empty($changes)) {
+            return [['text' => 'Release notes on GitHub', 'type' => 'more']];
+        }
+
+        // If more than 5 changes, truncate and add "view more" message
+        if (count($changes) > 5) {
+            $changes = array_slice($changes, 0, 5);
+            $changes[] = ['text' => 'Full release notes on GitHub', 'type' => 'more'];
+        }
+
+        return $changes;
     }
 }
