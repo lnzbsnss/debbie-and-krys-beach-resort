@@ -179,7 +179,7 @@ export interface PaginatedData<T> {
 
 export interface GitHubChangeItem {
     text: string;
-    type: 'header' | 'item';
+    type: 'header' | 'item' | 'more';
 }
 
 export interface GitHubUpdate {
