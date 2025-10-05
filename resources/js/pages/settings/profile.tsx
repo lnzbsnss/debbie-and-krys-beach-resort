@@ -24,6 +24,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
     const { auth } = usePage<SharedData>().props;
 
+    const isAdmin = auth.user?.roles?.includes('admin') ?? false;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
@@ -69,12 +71,19 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         required
                                         autoComplete="username"
                                         placeholder="Email address"
+                                        readOnly={isAdmin}
                                     />
 
                                     <InputError className="mt-2" message={errors.email} />
+
+                                    {isAdmin && (
+                                        <p className="text-sm text-muted-foreground">
+                                            Admin email cannot be edited.
+                                        </p>
+                                    )}
                                 </div>
 
-                                {mustVerifyEmail && auth.user.email_verified_at === null && (
+                                {mustVerifyEmail && auth.user.email_verified_at === null && !isAdmin && (
                                     <div>
                                         <p className="-mt-4 text-sm text-muted-foreground">
                                             Your email address is unverified.{' '}
@@ -113,7 +122,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     </Form>
                 </div>
 
-                <DeleteUser />
+                {/* <DeleteUser /> */}
             </SettingsLayout>
         </AppLayout>
     );

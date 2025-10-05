@@ -18,6 +18,9 @@ class PermissionRoleUserSeeder extends Seeder
             // global
             'global access',
 
+            // global
+            'pulse access',
+
             // customer
             'customer access',
 

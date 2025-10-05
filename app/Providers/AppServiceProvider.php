@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::define('viewPulse', function (User $user) {
-            return $user->hasRole('admin');
+            return $user->hasPermissionTo('pulse access') || $user->hasPermissionTo('global access');
         });
     }
 }

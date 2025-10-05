@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { PasswordInput } from '@/components/password-input';
 import PasswordRequirements, { validatePassword } from '@/components/password-requirements';
-import { UserFormData, UserRole, UserData } from '@/types';
+import { UserRole, UserData, EditUserFormData } from '@/types';
 import users from '@/routes/users';
 import { LoaderCircle } from 'lucide-react';
 
@@ -38,7 +38,7 @@ export default function EditUserModal({
 }: EditUserModalProps) {
     const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
 
-    const { data, setData, put, processing, errors, reset } = useForm<UserFormData & { password_confirmation: string }>({
+    const { data, setData, put, processing, errors, reset } = useForm<EditUserFormData>({
         name: '',
         email: '',
         password: '',
@@ -79,8 +79,8 @@ export default function EditUserModal({
     // For edit form, we need to check if password is required
     const passwordRequired = data.password.length > 0;
     const canSubmit = data.name && data.email &&
-                     (!passwordRequired || (isPasswordValid && isPasswordMatch)) &&
-                     !processing;
+        (!passwordRequired || (isPasswordValid && isPasswordMatch)) &&
+        !processing;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

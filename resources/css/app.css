@@ -5,6 +5,8 @@
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
     --font-sans:
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -58,41 +60,104 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.87 0 0);
-    --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
-    --chart-3: oklch(0.398 0.07 227.392);
-    --chart-4: oklch(0.828 0.189 84.429);
-    --chart-5: oklch(0.769 0.188 70.08);
+    /* Beach Resort Palette - Cream/Ivory Based */
+    --background: #F5F2E8;                    /* Cream/Ivory */
+    --foreground: #2C3E50;                    /* Charcoal */
+    --card: #F5F2E8;                          /* Cream/Ivory */
+    --card-foreground: #2C3E50;               /* Charcoal */
+    --popover: #F5F2E8;                       /* Cream/Ivory */
+    --popover-foreground: #2C3E50;            /* Charcoal */
+
+    /* Primary - Sunset Orange */
+    --primary: #E55A2B;                       /* Sunset Orange */
+    --primary-foreground: #FFFFFF;            /* White text */
+
+    /* Secondary - Deep Teal */
+    --secondary: #1F5F5B;                     /* Deep Teal */
+    --secondary-foreground: #F5F2E8;          /* Cream text */
+
+    /* Muted - Warm Sand */
+    --muted: #D4B896;                         /* Warm Sand */
+    --muted-foreground: #64748B;              /* Slate Gray */
+
+    /* Accent - Ocean Blue */
+    --accent: #2E86AB;                        /* Ocean Blue */
+    --accent-foreground: #FFFFFF;             /* White text */
+
+    /* Success - Palm Green */
+    --success: #6B8E23;                       /* Palm Green */
+    --success-foreground: #FFFFFF;            /* White text */
+
+    /* Borders and inputs */
+    --border: #D4B896;                        /* Warm Sand */
+    --input: #EBE6D8;                         /* Very light cream */
+    --ring: #E55A2B;                          /* Sunset Orange for focus */
+
+    /* Destructive */
+    --destructive: #DC3545;                   /* Coral red */
+    --destructive-foreground: #FFFFFF;        /* White text */
+
+    --chart-1: #E55A2B;                       /* Sunset Orange */
+    --chart-2: #2E86AB;                       /* Ocean Blue */
+    --chart-3: #6B8E23;                       /* Palm Green */
+    --chart-4: #F4D03F;                       /* Golden Yellow */
+    --chart-5: #1F5F5B;                       /* Deep Teal */
     --radius: 0.625rem;
 
-    /* Ocean Blues Sidebar Palette - Complements the beach resort logo */
-    --sidebar: oklch(0.4 0.15 240);                       /* Deep ocean blue - main sidebar */
-    --sidebar-foreground: oklch(0.95 0.02 240);           /* Very light blue-white text */
-    --sidebar-primary: oklch(0.35 0.18 230);              /* Darker navy for primary elements */
-    --sidebar-primary-foreground: oklch(1 0 0);           /* Pure white text */
-    --sidebar-accent: oklch(0.5 0.12 250);                /* Lighter ocean blue for accents */
-    --sidebar-accent-foreground: oklch(0.95 0.02 240);    /* Light blue-white text */
-    --sidebar-border: oklch(0.3 0.15 230);                /* Dark navy border */
-    --sidebar-ring: oklch(0.6 0.15 240);                  /* Brighter blue for focus rings */
+    /* Sidebar - Deep Ocean Theme */
+    --sidebar: #1F5F5B;                       /* Deep Teal - main sidebar */
+    --sidebar-foreground: #F5F2E8;            /* Cream text */
+    --sidebar-primary: #E55A2B;               /* Sunset Orange */
+    --sidebar-primary-foreground: #FFFFFF;    /* White text */
+    --sidebar-accent: #2E86AB;                /* Ocean Blue */
+    --sidebar-accent-foreground: #FFFFFF;     /* White text */
+    --sidebar-border: #164C48;                /* Darker teal */
+    --sidebar-ring: #E55A2B;                  /* Sunset Orange focus */
+}
+
+.dark {
+    /* Dark mode - Deep ocean night theme */
+    --background: #1A1A1A;                    /* Deep dark */
+    --foreground: #F5F2E8;                    /* Cream text */
+    --card: #2A2A2A;                          /* Dark card */
+    --card-foreground: #F5F2E8;               /* Cream text */
+    --popover: #1A1A1A;                       /* Deep dark */
+    --popover-foreground: #F5F2E8;            /* Cream text */
+
+    --primary: #F06B3B;                       /* Brighter sunset orange */
+    --primary-foreground: #1A1A1A;            /* Dark text */
+
+    --secondary: #2A7873;                     /* Lighter teal */
+    --secondary-foreground: #F5F2E8;          /* Cream text */
+
+    --muted: #3A3A3A;                         /* Dark muted */
+    --muted-foreground: #B0B0B0;              /* Light gray */
+
+    --accent: #2E86AB;                        /* Ocean Blue */
+    --accent-foreground: #F5F2E8;             /* Cream text */
+
+    --border: #3A3A3A;                        /* Dark border */
+    --input: #2A2A2A;                         /* Dark input background */
+    --ring: #F06B3B;                          /* Bright sunset orange focus */
+
+    --destructive: #FF4757;                   /* Bright red */
+    --destructive-foreground: #FFFFFF;        /* White text */
+
+    --chart-1: #F06B3B;                       /* Brighter sunset */
+    --chart-2: #2E86AB;                       /* Ocean Blue */
+    --chart-3: #6B8E23;                       /* Palm Green */
+    --chart-4: #F4D03F;                       /* Golden Yellow */
+    --chart-5: #2A7873;                       /* Lighter Teal */
+
+    /* Dark sidebar */
+    --sidebar: #0F1419;                       /* Very dark teal */
+    --sidebar-foreground: #F5F2E8;            /* Cream text */
+    --sidebar-primary: #F06B3B;               /* Bright sunset orange */
+    --sidebar-primary-foreground: #0F1419;    /* Very dark text */
+    --sidebar-accent: #2E86AB;                /* Ocean Blue */
+    --sidebar-accent-foreground: #F5F2E8;     /* Cream text */
+    --sidebar-border: #2A2A2A;                /* Dark border */
+    --sidebar-ring: #F06B3B;                  /* Bright sunset orange focus */
 }
 
 @layer base {
@@ -102,5 +167,20 @@
 
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+@layer utilities {
+    .animate-pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.6;
+        }
     }
 }
