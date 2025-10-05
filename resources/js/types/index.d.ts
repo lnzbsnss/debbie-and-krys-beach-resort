@@ -74,7 +74,26 @@ export interface UserFormData {
     name: string;
     email: string;
     password?: string;
-    password_confirmation?: string;
+    status: string;
+    email_verified_at: boolean;
+    roles: string[];
+}
+
+export interface CreateUserFormData {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+    status: string;
+    email_verified_at: boolean;
+    roles: string[];
+}
+
+export interface EditUserFormData {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
     status: string;
     email_verified_at: boolean;
     roles: string[];
@@ -191,4 +210,23 @@ export interface GitHubUpdate {
     changes: GitHubChangeItem[];
     html_url: string;
     author: string;
+}
+
+export interface Notification {
+    id: string;
+    title: string;
+    message: string;
+    timestamp: string;
+    isRead: boolean;
+    type: 'info' | 'warning' | 'success' | 'error';
+}
+
+export interface AppSidebarHeaderProps {
+    breadcrumbs?: BreadcrumbItem[];
+    notifications?: Notification[];
+    loading?: boolean;
+    onMarkAsRead?: (notificationId: string) => void;
+    onMarkAllAsRead?: () => void;
+    onRemoveNotification?: (notificationId: string) => void;
+    onRefreshNotifications?: () => void;
 }

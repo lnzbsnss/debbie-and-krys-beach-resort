@@ -78,7 +78,7 @@ export function GithubUpdatesModal({ children }: GithubUpdatesModalProps) {
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto [&>button]:cursor-pointer [&>button]:hover:bg-red-500 [&>button]:hover:text-white [&>button]:transition-colors [&>button]:duration-200">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <GitBranch className="h-5 w-5" />
@@ -91,7 +91,7 @@ export function GithubUpdatesModal({ children }: GithubUpdatesModalProps) {
 
                 {loading ? (
                     <div className="flex items-center justify-center py-8">
-                        <div className="text-sm text-muted-foreground">Loading updates...</div>
+                        <div className="text-sm text-muted-foreground">Loading...</div>
                     </div>
                 ) : error ? (
                     <div className="flex items-center justify-center py-8">

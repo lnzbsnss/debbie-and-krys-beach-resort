@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { PasswordInput } from '@/components/password-input';
 import PasswordRequirements, { validatePassword } from '@/components/password-requirements';
-import { UserRole, UserFormData } from '@/types';
+import { UserRole, CreateUserFormData } from '@/types';
 import { LoaderCircle } from 'lucide-react';
 
 interface CreateUserModalProps {
@@ -31,7 +31,7 @@ interface CreateUserModalProps {
 export default function CreateUserModal({ open, onOpenChange, availableRoles }: CreateUserModalProps) {
     const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm<UserFormData & { password_confirmation: string }>({
+    const { data, setData, post, processing, errors, reset } = useForm<CreateUserFormData>({
         name: '',
         email: '',
         password: '',
@@ -82,7 +82,7 @@ export default function CreateUserModal({ open, onOpenChange, availableRoles }: 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Create New User</DialogTitle>
                 </DialogHeader>

@@ -30,7 +30,7 @@ export default function DeleteUser() {
                             Delete account
                         </Button>
                         <p className="text-sm text-muted-foreground">
-                            Admin accounts cannot be deleted.
+                            Admin account cannot be deleted.
                         </p>
                     </div>
                 ) : (
