@@ -10,6 +10,7 @@ import CreateRoleModal from './create-role-modal';
 import ShowRoleModal from './show-role-modal';
 import EditRoleModal from './edit-role-modal';
 import DeleteRoleModal from './delete-role-modal';
+import { type BreadcrumbItem } from '@/types';
 
 export default function Index({ roles, permissions, filterOptions, queryParams, ...props }: RoleIndexProps) {
     const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -121,8 +122,19 @@ export default function Index({ roles, permissions, filterOptions, queryParams, 
         updated_at: role.updated_at,
     }));
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Dashboard',
+            href: '/dashboard',
+        },
+        {
+            title: 'Roles',
+            href: '/roles',
+        },
+    ];
+
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Roles" />
 
             <div className="py-6">

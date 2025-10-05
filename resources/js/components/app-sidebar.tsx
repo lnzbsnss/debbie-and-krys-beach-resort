@@ -1,11 +1,14 @@
+// resources\js\components\app-sidebar.tsx
+
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Users, Shield } from 'lucide-react';
+import { LayoutGrid, Users, Shield, GitBranch, HeartPulse } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
+import { GithubUpdatesModal } from '@/components/github-updates-modal';
 
 const allNavItems: NavItem[] = [
     {
@@ -15,13 +18,19 @@ const allNavItems: NavItem[] = [
         requiredPermissions: [],
     },
     {
-        title: 'User',
+        title: 'Pulse',
+        href: '/pulse',
+        icon: HeartPulse,
+        requiredPermissions: ['pulse access', 'global access'],
+    },
+    {
+        title: 'Users',
         href: '/users',
         icon: Users,
         requiredPermissions: ['user show', 'global access'],
     },
     {
-        title: 'Role',
+        title: 'Roles',
         href: '/roles',
         icon: Shield,
         requiredPermissions: ['role show', 'global access'],
@@ -66,6 +75,18 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <GithubUpdatesModal>
+                            <SidebarMenuButton className="w-full cursor-pointer animate-pulse-glow" asChild>
+                                <button className="flex items-center gap-2 w-full">
+                                    <GitBranch className="h-4 w-4" />
+                                    <span>Updates</span>
+                                </button>
+                            </SidebarMenuButton>
+                        </GithubUpdatesModal>
+                    </SidebarMenuItem>
+                </SidebarMenu>
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

@@ -1,3 +1,5 @@
+// resources\js\types\index.d.ts
+
 export interface Auth {
     user: User;
 }
@@ -72,7 +74,26 @@ export interface UserFormData {
     name: string;
     email: string;
     password?: string;
-    password_confirmation?: string;
+    status: string;
+    email_verified_at: boolean;
+    roles: string[];
+}
+
+export interface CreateUserFormData {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+    status: string;
+    email_verified_at: boolean;
+    roles: string[];
+}
+
+export interface EditUserFormData {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
     status: string;
     email_verified_at: boolean;
     roles: string[];
@@ -173,4 +194,39 @@ export interface PaginatedData<T> {
     total: number;
     from: number;
     to: number;
+}
+
+export interface GitHubChangeItem {
+    text: string;
+    type: 'header' | 'item' | 'more';
+}
+
+export interface GitHubUpdate {
+    version: string;
+    date: string;
+    type: string;
+    title: string;
+    description: string;
+    changes: GitHubChangeItem[];
+    html_url: string;
+    author: string;
+}
+
+export interface Notification {
+    id: string;
+    title: string;
+    message: string;
+    timestamp: string;
+    isRead: boolean;
+    type: 'info' | 'warning' | 'success' | 'error';
+}
+
+export interface AppSidebarHeaderProps {
+    breadcrumbs?: BreadcrumbItem[];
+    notifications?: Notification[];
+    loading?: boolean;
+    onMarkAsRead?: (notificationId: string) => void;
+    onMarkAllAsRead?: () => void;
+    onRemoveNotification?: (notificationId: string) => void;
+    onRefreshNotifications?: () => void;
 }

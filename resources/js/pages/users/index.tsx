@@ -10,6 +10,7 @@ import CreateUserModal from './create-user-modal';
 import ShowUserModal from './show-user-modal';
 import EditUserModal from './edit-user-modal';
 import DeleteUserModal from './delete-user-modal';
+import { type BreadcrumbItem } from '@/types';
 
 export default function Index({ users, availableRoles, filterOptions, queryParams, ...props }: UserIndexProps) {
     const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -161,8 +162,19 @@ export default function Index({ users, availableRoles, filterOptions, queryParam
         created_at: user.created_at,
     }));
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Dashboard',
+            href: '/dashboard',
+        },
+        {
+            title: 'Users',
+            href: '/users',
+        },
+    ];
+
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Users" />
 
             <div className="py-6">
