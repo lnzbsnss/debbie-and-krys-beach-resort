@@ -1,6 +1,6 @@
 import { Appearance, useAppearance } from '@/hooks/use-appearance';
 import { cn } from '@/lib/utils';
-import { LucideIcon, Sun } from 'lucide-react';
+import { LucideIcon, Monitor, Moon, Sun } from 'lucide-react';
 import { HTMLAttributes } from 'react';
 
 export default function AppearanceToggleTab({ className = '', ...props }: HTMLAttributes<HTMLDivElement>) {
@@ -8,6 +8,8 @@ export default function AppearanceToggleTab({ className = '', ...props }: HTMLAt
 
     const tabs: { value: Appearance; icon: LucideIcon; label: string }[] = [
         { value: 'light', icon: Sun, label: 'Light' },
+        { value: 'dark', icon: Moon, label: 'Dark' },
+        // { value: 'system', icon: Monitor, label: 'System' },
     ];
 
     return (
@@ -17,9 +19,9 @@ export default function AppearanceToggleTab({ className = '', ...props }: HTMLAt
                     key={value}
                     onClick={() => updateAppearance(value)}
                     className={cn(
-                        'flex items-center rounded-md px-3.5 py-1.5 transition-colors',
+                        'flex items-center rounded-md px-3.5 py-1.5 transition-colors cursor-pointer',
                         appearance === value
-                            ? 'bg-white shadow-xs'
+                            ? 'bg-white shadow-xs text-black'
                             : 'text-neutral-500 hover:bg-neutral-200/60 hover:text-black',
                     )}
                 >
