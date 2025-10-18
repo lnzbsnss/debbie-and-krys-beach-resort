@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { PasswordInput } from '@/components/password-input';
 import PasswordRequirements, { validatePassword } from '@/components/password-requirements';
-import { UserRole, UserData, EditUserFormData } from '@/types';
+import { type UserRole, type UserData, type UserFormData } from '@/types';
 import users from '@/routes/users';
 import { LoaderCircle } from 'lucide-react';
 
@@ -38,7 +38,7 @@ export default function EditUserModal({
 }: EditUserModalProps) {
     const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
 
-    const { data, setData, put, processing, errors, reset } = useForm<EditUserFormData>({
+    const { data, setData, put, processing, errors, reset } = useForm<UserFormData>({
         name: '',
         email: '',
         password: '',
@@ -110,7 +110,7 @@ export default function EditUserModal({
         if (checked) {
             setData('roles', [...data.roles, roleName]);
         } else {
-            setData('roles', data.roles.filter(r => r !== roleName));
+            setData('roles', data.roles.filter((r: string) => r !== roleName));
         }
     };
 

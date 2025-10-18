@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { PasswordInput } from '@/components/password-input';
 import PasswordRequirements, { validatePassword } from '@/components/password-requirements';
-import { UserRole, CreateUserFormData } from '@/types';
+import { type UserRole, type UserFormData } from '@/types';
 import { LoaderCircle } from 'lucide-react';
 
 interface CreateUserModalProps {
@@ -31,7 +31,7 @@ interface CreateUserModalProps {
 export default function CreateUserModal({ open, onOpenChange, availableRoles }: CreateUserModalProps) {
     const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm<CreateUserFormData>({
+    const { data, setData, post, processing, errors, reset } = useForm<UserFormData>({
         name: '',
         email: '',
         password: '',
@@ -67,7 +67,7 @@ export default function CreateUserModal({ open, onOpenChange, availableRoles }: 
     const handleRoleChange = (roleName: string, checked: boolean) => {
         setData('roles', checked
             ? [...data.roles, roleName]
-            : data.roles.filter(role => role !== roleName)
+            : data.roles.filter((role: string) => role !== roleName)
         );
     };
 

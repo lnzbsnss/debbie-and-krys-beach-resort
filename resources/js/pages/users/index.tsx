@@ -4,13 +4,13 @@ import { Plus, Edit, Trash2, Shield, ShieldCheck, Eye } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { UserIndexProps, UserData, DataTableColumn } from '@/types';
 import DataTable from '@/components/datatable/datatable';
 import CreateUserModal from './create-user-modal';
 import ShowUserModal from './show-user-modal';
 import EditUserModal from './edit-user-modal';
 import DeleteUserModal from './delete-user-modal';
-import { type BreadcrumbItem } from '@/types';
+
+import { type UserIndexProps, type UserData, type DataTableColumn, type BreadcrumbItem } from '@/types';
 
 export default function Index({ users, availableRoles, filterOptions, queryParams, ...props }: UserIndexProps) {
     const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -34,11 +34,10 @@ export default function Index({ users, availableRoles, filterOptions, queryParam
         setDeleteModalOpen(true);
     };
 
-    const canCreateUser = props.auth.user.permissions?.includes('user create') || props.auth.user.permissions?.includes('global access');
-    const canShowUser = props.auth.user?.permissions?.includes('user show') ||
-        props.auth.user?.permissions?.includes('global access');
-    const canEditUser = props.auth.user.permissions?.includes('user edit') || props.auth.user.permissions?.includes('global access');
-    const canDeleteUser = props.auth.user.permissions?.includes('user delete') || props.auth.user.permissions?.includes('global access');
+    const canCreateUser = props.auth.user?.permissions?.includes('user create') || props.auth.user?.permissions?.includes('global access');
+    const canShowUser = props.auth.user?.permissions?.includes('user show') || props.auth.user?.permissions?.includes('global access');
+    const canEditUser = props.auth.user?.permissions?.includes('user edit') || props.auth.user?.permissions?.includes('global access');
+    const canDeleteUser = props.auth.user?.permissions?.includes('user delete') || props.auth.user?.permissions?.includes('global access');
 
     // Define table columns
     const columns: DataTableColumn[] = [
