@@ -75,10 +75,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
             // Check if user has any of the required permissions
             return item.requiredPermissions.some(permission =>
-                auth.user.permissions?.includes(permission)
+                auth.user?.permissions?.includes(permission)
             );
         });
-    }, [auth.user.permissions]);
+    }, [auth.user?.permissions]);
 
     return (
         <>
@@ -101,10 +101,17 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     <div className="flex h-full flex-col justify-between text-sm">
                                         <div className="flex flex-col space-y-4">
                                             {mainNavItems.map((item) => (
-                                                <Link key={item.title} href={item.href} className="flex items-center space-x-2 font-medium">
-                                                    {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
-                                                    <span>{item.title}</span>
-                                                </Link>
+                                                item.isExternal ? (
+                                                    <a key={item.title} href={typeof item.href === 'string' ? item.href : item.href.url} className="flex items-center space-x-2 font-medium">
+                                                        {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                        <span>{item.title}</span>
+                                                    </a>
+                                                ) : (
+                                                    <Link key={item.title} href={item.href} className="flex items-center space-x-2 font-medium">
+                                                        {item.icon && <Icon iconNode={item.icon} className="h-5 w-5" />}
+                                                        <span>{item.title}</span>
+                                                    </Link>
+                                                )
                                             ))}
                                         </div>
 
@@ -134,17 +141,31 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             <NavigationMenuList className="flex h-full items-stretch space-x-2">
                                 {mainNavItems.map((item, index) => (
                                     <NavigationMenuItem key={index} className="relative flex h-full items-center">
-                                        <Link
-                                            href={item.href}
-                                            className={cn(
-                                                navigationMenuTriggerStyle(),
-                                                page.url === (typeof item.href === 'string' ? item.href : item.href.url) && activeItemStyles,
-                                                'h-9 cursor-pointer px-3',
-                                            )}
-                                        >
-                                            {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
-                                            {item.title}
-                                        </Link>
+                                        {item.isExternal ? (
+                                            <a
+                                                href={item.href}
+                                                className={cn(
+                                                    navigationMenuTriggerStyle(),
+                                                    page.url === (typeof item.href === 'string' ? item.href : item.href.url) && activeItemStyles,
+                                                    'h-9 cursor-pointer px-3',
+                                                )}
+                                            >
+                                                {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
+                                                {item.title}
+                                            </a>
+                                        ) : (
+                                            <Link
+                                                href={item.href}
+                                                className={cn(
+                                                    navigationMenuTriggerStyle(),
+                                                    page.url === (typeof item.href === 'string' ? item.href : item.href.url) && activeItemStyles,
+                                                    'h-9 cursor-pointer px-3',
+                                                )}
+                                            >
+                                                {item.icon && <Icon iconNode={item.icon} className="mr-2 h-4 w-4" />}
+                                                {item.title}
+                                            </Link>
+                                        )}
                                         {page.url === item.href && (
                                             <div className="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black"></div>
                                         )}
@@ -183,15 +204,15 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="size-10 rounded-full p-1">
                                     <Avatar className="size-8 overflow-hidden rounded-full">
-                                        <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
+                                        <AvatarImage src={auth.user?.avatar} alt={auth.user?.name || 'User'} />
                                         <AvatarFallback className="rounded-lg bg-neutral-200 text-black">
-                                            {getInitials(auth.user.name)}
+                                            {getInitials(auth.user?.name || 'User')}
                                         </AvatarFallback>
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-56" align="end">
-                                <UserMenuContent user={auth.user} />
+                                {auth.user && <UserMenuContent user={auth.user} />}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>

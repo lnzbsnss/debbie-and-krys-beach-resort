@@ -22,6 +22,7 @@ const allNavItems: NavItem[] = [
         href: '/pulse',
         icon: HeartPulse,
         requiredPermissions: ['pulse access', 'global access'],
+        isExternal: true,
     },
     {
         title: 'Users',
@@ -51,10 +52,10 @@ export function AppSidebar() {
 
             // Check if user has any of the required permissions
             return item.requiredPermissions.some(permission =>
-                auth.user.permissions?.includes(permission)
+                auth.user?.permissions?.includes(permission)
             );
         });
-    }, [auth.user.permissions]);
+    }, [auth.user?.permissions]);
 
     return (
         <Sidebar collapsible="icon" variant="inset">

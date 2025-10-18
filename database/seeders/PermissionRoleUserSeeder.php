@@ -61,9 +61,10 @@ class PermissionRoleUserSeeder extends Seeder
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'email_verified_at' => now(),
                 'name' => 'admin',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password'),
+                'password_changed_at' => now(),
                 'status' => 'active',
             ]
         );
@@ -82,8 +83,8 @@ class PermissionRoleUserSeeder extends Seeder
         $staffUser = User::firstOrCreate(
             ['email' => 'staff@example.com'],
             [
-                'email_verified_at' => now(),
                 'name' => 'staff',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'status' => 'active',
             ]
@@ -103,8 +104,8 @@ class PermissionRoleUserSeeder extends Seeder
         $customerUser = User::firstOrCreate(
             ['email' => 'customer@example.com'],
             [
-                'email_verified_at' => now(),
                 'name' => 'customer',
+                'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'status' => 'active',
             ]

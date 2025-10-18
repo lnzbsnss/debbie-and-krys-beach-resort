@@ -1,10 +1,10 @@
 import { dashboard, login, register } from '@/routes';
-import { type SharedData } from '@/types';
+import { type PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { MapPin, Phone, Mail, Facebook } from 'lucide-react';
 
 export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth } = usePage<PageProps>().props;
 
     return (
         <>
