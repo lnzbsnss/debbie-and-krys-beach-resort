@@ -38,6 +38,15 @@ class PermissionRoleUserSeeder extends Seeder
             'role create',
             'role edit',
             'role delete',
+
+            // room
+            'room access',
+
+            // cottage
+            'cottage access',
+
+            // entrance fee
+            'entrance fee access',
         ];
 
         foreach ($permissions as $permission) {

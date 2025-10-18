@@ -13,7 +13,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, Users, Shield, Menu, Search, GitBranch, HeartPulse } from 'lucide-react';
+import { LayoutGrid, Users, Shield, Menu, Search, GitBranch, HeartPulse, Hotel, Home, DollarSign } from 'lucide-react';
 import { useMemo } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
@@ -31,6 +31,24 @@ const allNavItems: NavItem[] = [
         href: '/pulse',
         icon: HeartPulse,
         requiredPermissions: ['pulse access', 'global access'],
+    },
+    {
+        title: 'Rooms',
+        href: '/rooms',
+        icon: Hotel,
+        requiredPermissions: ['room access', 'global access'],
+    },
+    {
+        title: 'Cottages',
+        href: '/cottages',
+        icon: Home,
+        requiredPermissions: ['cottage access', 'global access'],
+    },
+    {
+        title: 'Entrance Fees',
+        href: '/entrance-fees',
+        icon: DollarSign,
+        requiredPermissions: ['entrance fee access', 'global access'],
     },
     {
         title: 'Users',

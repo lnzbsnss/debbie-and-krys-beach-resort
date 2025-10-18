@@ -6,6 +6,9 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\GitHubController;
+use App\Http\Controllers\RoomController;
+use App\Http\Controllers\CottageController;
+use App\Http\Controllers\EntranceFeeController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -26,15 +29,10 @@ Route::middleware(['auth', 'verified', 'check.user.status'])->group(function () 
     Route::post('/users/{user}/unlock', [UserController::class, 'unlock'])->name('users.unlock');
 
     Route::resource('roles', RoleController::class)->except(['create', 'show', 'edit']);
-});
 
-// In web.php
-Route::get('/test-google-config', function() {
-    return [
-        'client_id' => config('services.google.client_id'),
-        'client_secret' => config('services.google.client_secret') ? 'Set' : 'Not set',
-        'redirect' => config('services.google.redirect'),
-    ];
+    Route::resource('rooms', RoomController::class);
+    Route::resource('cottages', CottageController::class);
+    Route::resource('entrance-fees', EntranceFeeController::class);
 });
 
 require __DIR__.'/settings.php';
