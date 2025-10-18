@@ -37,6 +37,12 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+    Route::get('first-time-password', [NewPasswordController::class, 'firstTime'])
+        ->name('password.first-time');
+
+    Route::post('first-time-password', [NewPasswordController::class, 'updateFirstTime'])
+        ->name('password.update-first-time');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

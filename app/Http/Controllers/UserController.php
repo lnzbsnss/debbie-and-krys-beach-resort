@@ -156,6 +156,9 @@ class UserController extends Controller
                 'email_verified_at' => $user->email_verified_at,
                 'email_verified' => $user->email_verified_at ? 'Verified' : 'Unverified',
                 'email_verified_status' => $user->email_verified_at ? 'verified' : 'unverified',
+                'password_changed_at' => $user->password_changed_at,
+                'password_changed' => $user->password_changed_at ? 'Changed' : 'Not Changed',
+                'password_changed_status' => $user->password_changed_at ? 'changed' : 'not-changed',
                 'roles' => $user->roles->pluck('name')->toArray(),
                 'roles_text' => $user->roles->pluck('name')->implode(', ') ?: 'No roles',
                 'roles_count' => $user->roles->count(),
@@ -164,6 +167,8 @@ class UserController extends Controller
                 'is_admin' => $user->hasRole('admin'),
                 'created_at' => $user->created_at->format('M d, Y'),
                 'updated_at' => $user->updated_at->format('M d, Y'),
+                'is_locked' => $user->is_locked,
+                'locked_at' => $user->locked_at,
             ];
         });
 
@@ -231,6 +236,7 @@ class UserController extends Controller
             'password_confirmation' => ['required', 'same:password'],
             'status' => ['required', 'string', 'in:active,inactive'],
             'email_verified_at' => ['nullable', 'boolean'],
+            'password_changed_at' => ['nullable', 'boolean'],
             'roles' => ['array'],
             'roles.*' => ['string', 'exists:roles,name'],
         ]);
@@ -241,6 +247,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'status' => $request->status,
             'email_verified_at' => $request->email_verified_at ? now() : null,
+            'password_changed_at' => $request->password_changed_at ? now() : null,
         ]);
 
         if ($request->roles) {
@@ -270,6 +277,7 @@ class UserController extends Controller
             'password' => $passwordRules,
             'status' => ['required', 'string', 'in:active,inactive'],
             'email_verified_at' => ['nullable', 'boolean'],
+            'password_changed_at' => ['nullable', 'boolean'],
             'roles' => ['array'],
             'roles.*' => ['string', 'exists:roles,name'],
         ];
@@ -286,10 +294,12 @@ class UserController extends Controller
             'email' => $request->email,
             'status' => $request->status,
             'email_verified_at' => $request->email_verified_at ? now() : null,
+            'password_changed_at' => $request->password_changed_at ? now() : null,
         ];
 
         if ($request->filled('password')) {
             $updateData['password'] = Hash::make($request->password);
+            $updateData['password_changed_at'] = now();
         }
 
         $user->update($updateData);
@@ -318,5 +328,31 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->back()->with('success', 'User deleted successfully.');
+    }
+
+    public function lock(User $user)
+    {
+        if ($user->id === 1) {
+            return back()->with('error', 'Super admin cannot be locked.');
+        }
+
+        if ($user->hasRole('admin')) {
+            return back()->with('error', 'Admin users cannot be locked.');
+        }
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot lock your own account.');
+        }
+
+        $user->update(['is_locked' => true]);
+
+        return back()->with('success', 'User account locked successfully.');
+    }
+
+    public function unlock(User $user)
+    {
+        $user->update(['is_locked' => false]);
+
+        return back()->with('success', 'User account unlocked successfully.');
     }
 }

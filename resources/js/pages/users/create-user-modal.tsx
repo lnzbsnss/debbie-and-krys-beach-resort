@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { PasswordInput } from '@/components/password-input';
 import PasswordRequirements, { validatePassword } from '@/components/password-requirements';
-import { UserRole, CreateUserFormData } from '@/types';
+import { type UserRole, type UserFormData } from '@/types';
 import { LoaderCircle } from 'lucide-react';
 
 interface CreateUserModalProps {
@@ -31,13 +31,14 @@ interface CreateUserModalProps {
 export default function CreateUserModal({ open, onOpenChange, availableRoles }: CreateUserModalProps) {
     const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm<CreateUserFormData>({
+    const { data, setData, post, processing, errors, reset } = useForm<UserFormData>({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
         status: 'active',
         email_verified_at: false,
+        password_changed_at: false,
         roles: [],
     });
 
@@ -67,7 +68,7 @@ export default function CreateUserModal({ open, onOpenChange, availableRoles }: 
     const handleRoleChange = (roleName: string, checked: boolean) => {
         setData('roles', checked
             ? [...data.roles, roleName]
-            : data.roles.filter(role => role !== roleName)
+            : data.roles.filter((role: string) => role !== roleName)
         );
     };
 
@@ -171,18 +172,32 @@ export default function CreateUserModal({ open, onOpenChange, availableRoles }: 
                         )}
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                        <Checkbox
-                            id="email_verified"
-                            checked={data.email_verified_at}
-                            onCheckedChange={(checked) => setData('email_verified_at', checked as boolean)}
-                        />
-                        <Label htmlFor="email_verified">Email verified</Label>
+                    <div className="grid gap-2">
+                        <Label>Bypass</Label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="email_verified"
+                                    checked={data.email_verified_at}
+                                    onCheckedChange={(checked) => setData('email_verified_at', checked as boolean)}
+                                />
+                                <Label htmlFor="email_verified" className="text-sm">Email verified</Label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox
+                                    id="password_changed"
+                                    checked={data.password_changed_at}
+                                    onCheckedChange={(checked) => setData('password_changed_at', checked as boolean)}
+                                />
+                                <Label htmlFor="password_changed" className="text-sm">Password changed</Label>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="grid gap-2">
-                        <Label>Roles</Label>
-                        <div className="grid grid-cols-2 gap-2">
+                        <Label>Assign Roles</Label>
+                        <div className="border rounded-lg h-48 overflow-y-auto p-4 space-y-3">
                             {availableRoles.map((role) => (
                                 <div key={role.id} className="flex items-center space-x-2">
                                     <Checkbox
@@ -190,8 +205,13 @@ export default function CreateUserModal({ open, onOpenChange, availableRoles }: 
                                         checked={data.roles.includes(role.name)}
                                         onCheckedChange={(checked) => handleRoleChange(role.name, checked as boolean)}
                                     />
-                                    <Label htmlFor={`role-${role.id}`} className="text-sm">
+                                    <Label htmlFor={`role-${role.id}`} className="text-sm cursor-pointer">
                                         {role.label}
+                                        {role.name === 'admin' && (
+                                            <span className="ml-2 text-xs text-red-600 font-medium">
+                                                (Admin Role)
+                                            </span>
+                                        )}
                                     </Label>
                                 </div>
                             ))}

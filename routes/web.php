@@ -21,7 +21,10 @@ Route::middleware(['auth', 'verified', 'check.user.status'])->group(function () 
 
     Route::get('/api/github-updates', [GitHubController::class, 'getUpdates']);
 
-    Route::resource('users', UserController::class);
+    Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
+    Route::post('/users/{user}/lock', [UserController::class, 'lock'])->name('users.lock');
+    Route::post('/users/{user}/unlock', [UserController::class, 'unlock'])->name('users.unlock');
+
     Route::resource('roles', RoleController::class)->except(['create', 'show', 'edit']);
 });
 
