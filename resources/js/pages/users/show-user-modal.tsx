@@ -6,7 +6,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Shield, ShieldCheck, User, Mail, Calendar, Shield as ShieldIcon } from 'lucide-react';
+import { Shield, ShieldCheck, User, Mail, Calendar, Shield as ShieldIcon, Lock } from 'lucide-react';
 import { UserData } from '@/types';
 
 interface ShowUserModalProps {
@@ -22,7 +22,7 @@ export default function ShowUserModal({
 }: ShowUserModalProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <User className="w-5 h-5" />
@@ -30,7 +30,7 @@ export default function ShowUserModal({
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-6">
+                <div className="overflow-y-auto flex-1 space-y-6 pr-2">
                     {/* Basic Information */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -64,6 +64,31 @@ export default function ShowUserModal({
                         </div>
 
                         <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">Lock Status</label>
+                            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                                {user.is_locked ? (
+                                    <>
+                                        <Lock className="w-4 h-4 text-red-600" />
+                                        <span className="text-red-600">Locked</span>
+                                        {user.locked_at && (
+                                            <span className="text-xs text-gray-500">
+                                                ({new Date(user.locked_at).toLocaleDateString()})
+                                            </span>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <ShieldCheck className="w-4 h-4 text-green-600" />
+                                        <span className="text-green-600">Unlocked</span>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Verification Status */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700">Email Verification</label>
                             <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                                 {user.email_verified_at ? (
@@ -78,6 +103,26 @@ export default function ShowUserModal({
                                     <>
                                         <Shield className="w-4 h-4 text-gray-400" />
                                         <span className="text-gray-500">Unverified</span>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">Password Status</label>
+                            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                                {user.password_changed_at ? (
+                                    <>
+                                        <ShieldCheck className="w-4 h-4 text-green-600" />
+                                        <span className="text-green-600">Changed</span>
+                                        <span className="text-xs text-gray-500">
+                                            ({new Date(user.password_changed_at).toLocaleDateString()})
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Shield className="w-4 h-4 text-orange-400" />
+                                        <span className="text-orange-600">Not Changed</span>
                                     </>
                                 )}
                             </div>
@@ -141,7 +186,7 @@ export default function ShowUserModal({
                     )}
                 </div>
 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end pt-4 border-t">
                     <Button onClick={() => onOpenChange(false)}>
                         Close
                     </Button>

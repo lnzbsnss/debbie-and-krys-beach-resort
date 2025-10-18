@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head } from '@inertiajs/react';
-import { Plus, Edit, Trash2, Shield, ShieldCheck, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Shield, ShieldCheck, Eye, Lock, LockOpen } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import DataTable from '@/components/datatable/datatable';
 import CreateUserModal from './create-user-modal';
 import ShowUserModal from './show-user-modal';
 import EditUserModal from './edit-user-modal';
+import LockUserModal from './lock-user-modal';
 import DeleteUserModal from './delete-user-modal';
 
 import { type UserIndexProps, type UserData, type DataTableColumn, type BreadcrumbItem } from '@/types';
@@ -16,6 +17,7 @@ export default function Index({ users, availableRoles, filterOptions, queryParam
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [showModalOpen, setShowModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
+    const [lockModalOpen, setLockModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
 
@@ -29,6 +31,11 @@ export default function Index({ users, availableRoles, filterOptions, queryParam
         setEditModalOpen(true);
     };
 
+    const handleLock = (user: UserData) => {
+        setSelectedUser(user);
+        setLockModalOpen(true);
+    };
+
     const handleDelete = (user: UserData) => {
         setSelectedUser(user);
         setDeleteModalOpen(true);
@@ -37,6 +44,7 @@ export default function Index({ users, availableRoles, filterOptions, queryParam
     const canCreateUser = props.auth.user?.permissions?.includes('user create') || props.auth.user?.permissions?.includes('global access');
     const canShowUser = props.auth.user?.permissions?.includes('user show') || props.auth.user?.permissions?.includes('global access');
     const canEditUser = props.auth.user?.permissions?.includes('user edit') || props.auth.user?.permissions?.includes('global access');
+    const canLockUser = props.auth.user?.permissions?.includes('user edit') || props.auth.user?.permissions?.includes('global access');
     const canDeleteUser = props.auth.user?.permissions?.includes('user delete') || props.auth.user?.permissions?.includes('global access');
 
     // Define table columns
@@ -210,6 +218,17 @@ export default function Index({ users, availableRoles, filterOptions, queryParam
                                         <Edit className="w-4 h-4" />
                                     </Button>
                                 )}
+                                {canLockUser && user.can_edit && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleLock(user)}
+                                        title={user.is_locked ? 'Unlock user' : 'Lock user'}
+                                        className={user.is_locked ? 'text-green-600 hover:text-green-700 hover:border-green-300' : 'text-orange-600 hover:text-orange-700 hover:border-orange-300'}
+                                    >
+                                        {user.is_locked ? <LockOpen className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                                    </Button>
+                                )}
                                 {canDeleteUser && user.can_delete && (
                                     <Button
                                         variant="outline"
@@ -251,6 +270,11 @@ export default function Index({ users, availableRoles, filterOptions, queryParam
                         onOpenChange={setEditModalOpen}
                         user={selectedUser}
                         availableRoles={availableRoles}
+                    />
+                    <LockUserModal
+                        open={lockModalOpen}
+                        onOpenChange={setLockModalOpen}
+                        user={selectedUser}
                     />
                     <DeleteUserModal
                         open={deleteModalOpen}
