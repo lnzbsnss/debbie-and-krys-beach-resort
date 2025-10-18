@@ -1,9 +1,11 @@
-// resources\js\types\index.d.ts
+import type { User, UserIndexData } from './user';
+import type { RoleIndexData } from './role';
 
-export interface Auth {
-    user: User;
-}
+export * from './datatable';
+export * from './user';
+export * from './role';
 
+// Common types
 export interface BreadcrumbItem {
     title: string;
     href: string;
@@ -20,6 +22,7 @@ export interface NavItem {
     icon?: LucideIcon | null;
     isActive?: boolean;
     requiredPermissions?: string[];
+    isExternal?: boolean;
 }
 
 export interface Flash {
@@ -29,171 +32,13 @@ export interface Flash {
     info?: string;
 }
 
-export interface SharedData {
-    name: string;
-    quote: { message: string; author: string };
-    auth: Auth;
-    sidebarOpen: boolean;
-    [key: string]: unknown;
-}
-
-export interface PageProps extends SharedData {
-    flash?: Flash;
-    [key: string]: unknown;
-}
-
-// User
-export interface User {
-    id: number;
-    name: string;
-    email: string;
-    google_id?: string;
-    avatar?: string;
-    email_verified_at: string | null;
-    status: string;
-    created_at: string;
-    updated_at: string;
-    roles: string[];
-    permissions: string[];
-    [key: string]: unknown;
-}
-
-export interface UserData extends User {
-    status_label: string;
-    email_verified: string;
-    email_verified_status: 'verified' | 'unverified';
-    roles_text: string;
-    roles_count: number;
-
-    can_edit: boolean;
-    can_delete: boolean;
-    is_admin: boolean;
-}
-
-export interface UserFormData {
-    name: string;
-    email: string;
-    password?: string;
-    status: string;
-    email_verified_at: boolean;
-    roles: string[];
-}
-
-export interface CreateUserFormData {
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-    status: string;
-    email_verified_at: boolean;
-    roles: string[];
-}
-
-export interface EditUserFormData {
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-    status: string;
-    email_verified_at: boolean;
-    roles: string[];
-}
-
-export interface UserRole {
-    id: number;
-    name: string;
-    label: string;
-}
-
-export interface UserIndexProps extends PageProps {
-    users: PaginatedData<UserData>;
-    availableRoles: UserRole[];
-    filterOptions: FilterOptions;
-    queryParams: Partial<DataTableState>;
-}
-
-// Spatie Role Permission
-export interface Role {
-    id: number;
-    name: string;
-    display_name: string;
-    users_count: number;
-    users_count_text: string;
-    permissions: string[];
-    permissions_count: number;
-    permissions_text: string;
-    can_edit: boolean;
-    can_delete: boolean;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface Permission {
-    id: number;
-    name: string;
-    label: string;
-}
-
-export interface PermissionCategory {
-    category: string;
-    permissions: Permission[];
-}
-
-export interface RoleFormData {
-    name: string;
-    permissions: string[];
-}
-
-export interface RoleIndexProps extends PageProps {
-    roles: PaginatedData<Role>;
-    permissions: PermissionCategory[];
-    filterOptions: FilterOptions;
-    queryParams: Partial<DataTableState>;
-}
-
-// Datatable
-export interface DataTableColumn {
-    key: string;
-    label: string;
-    sortable?: boolean;
-    searchable?: boolean;
-    filterable?: boolean;
-    width?: string;
-    className?: string;
-}
-
-export interface DataTableFilter {
-    column: string;
-    values: string[];
-}
-
-export interface DataTableState {
-    search: string;
-    sort: string;
-    direction: 'asc' | 'desc';
-    perPage: number;
-    page: number;
-    filters: Record<string, string[]>;
-    columnVisibility: Record<string, boolean>;
-}
-
-export interface FilterOption {
-    value: string;
-    label: string;
-}
-
-export interface FilterOptions {
-    [key: string]: FilterOption[] | string[];
-}
-
-export interface PaginatedData<T> {
-    data: T[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number;
-    to: number;
+export interface Notification {
+    id: string;
+    title: string;
+    message: string;
+    timestamp: string;
+    isRead: boolean;
+    type: 'info' | 'warning' | 'success' | 'error';
 }
 
 export interface GitHubChangeItem {
@@ -212,13 +57,22 @@ export interface GitHubUpdate {
     author: string;
 }
 
-export interface Notification {
-    id: string;
-    title: string;
-    message: string;
-    timestamp: string;
-    isRead: boolean;
-    type: 'info' | 'warning' | 'success' | 'error';
+// Shared data types
+export interface Auth {
+    user: User | null;
+}
+
+export interface SharedData {
+    name: string;
+    quote: { message: string; author: string };
+    auth: Auth;
+    sidebarOpen: boolean;
+    [key: string]: unknown;
+}
+
+export interface PageProps extends SharedData {
+    flash?: Flash;
+    [key: string]: unknown;
 }
 
 export interface AppSidebarHeaderProps {
@@ -230,3 +84,7 @@ export interface AppSidebarHeaderProps {
     onRemoveNotification?: (notificationId: string) => void;
     onRefreshNotifications?: () => void;
 }
+
+// Page-specific props
+export type UserIndexProps = PageProps & UserIndexData;
+export type RoleIndexProps = PageProps & RoleIndexData;

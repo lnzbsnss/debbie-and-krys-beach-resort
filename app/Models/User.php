@@ -12,13 +12,15 @@ class User extends Authenticatable implements MustVerifyEmail
     use Notifiable, HasRoles;
 
     protected $fillable = [
+        'google_id',
+        'avatar',
         'name',
         'email',
         'email_verified_at',
-        'google_id',
-        'avatar',
         'password',
-        'status'
+        'password_changed_at',
+        'status',
+        'is_locked',
     ];
 
     protected $hidden = [
@@ -31,11 +33,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'password_changed_at' => 'datetime',
+            'is_locked' => 'boolean',
         ];
-    }
-
-    public function setEmailAttribute($value)
-    {
-        $this->attributes['email'] = strtolower($value);
     }
 }

@@ -34,11 +34,11 @@ export default function Index({ roles, permissions, filterOptions, queryParams, 
         setDeleteModalOpen(true);
     };
 
-    const canCreateRole = props.auth.user.permissions?.includes('role create') || props.auth.user.permissions?.includes('global access');
+    const canCreateRole = props.auth.user?.permissions?.includes('role create') || props.auth.user?.permissions?.includes('global access');
     const canShowRole = props.auth.user?.permissions?.includes('role show') ||
         props.auth.user?.permissions?.includes('global access');
-    const canEditRole = props.auth.user.permissions?.includes('role edit') || props.auth.user.permissions?.includes('global access');
-    const canDeleteRole = props.auth.user.permissions?.includes('role delete') || props.auth.user.permissions?.includes('global access');
+    const canEditRole = props.auth.user?.permissions?.includes('role edit') || props.auth.user?.permissions?.includes('global access');
+    const canDeleteRole = props.auth.user?.permissions?.includes('role delete') || props.auth.user?.permissions?.includes('global access');
 
     const columns: DataTableColumn[] = [
         {

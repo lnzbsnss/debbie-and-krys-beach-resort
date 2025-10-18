@@ -67,4 +67,27 @@ class NewPasswordController extends Controller
             'email' => [__($status)],
         ]);
     }
+
+    public function firstTime(Request $request)
+    {
+        return Inertia::render('auth/first-time-password', [
+            'email' => $request->user()->email,
+        ]);
+    }
+
+    public function updateFirstTime(Request $request)
+    {
+        $request->validate([
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = $request->user();
+
+        $user->update([
+            'password' => Hash::make($request->password),
+            'password_changed_at' => now(),
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Password updated successfully. Welcome!');
+    }
 }

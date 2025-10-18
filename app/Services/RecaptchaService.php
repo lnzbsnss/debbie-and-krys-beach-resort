@@ -42,14 +42,6 @@ class RecaptchaService
 
             $result = $response->json();
 
-            // Log the response for debugging
-            Log::info('reCAPTCHA verification response', [
-                'success' => $result['success'] ?? false,
-                'score' => $result['score'] ?? null,
-                'action' => $result['action'] ?? null,
-                'error_codes' => $result['error-codes'] ?? null
-            ]);
-
             // Check for API errors
             if (!($result['success'] ?? false)) {
                 Log::warning('reCAPTCHA verification failed', [
@@ -62,15 +54,6 @@ class RecaptchaService
             if (isset($result['score'])) {
                 $scoreCheck = $result['score'] >= $minScore;
                 $actionCheck = $result['action'] === $action;
-
-                Log::info('reCAPTCHA v3 verification', [
-                    'score' => $result['score'],
-                    'min_score' => $minScore,
-                    'score_passed' => $scoreCheck,
-                    'action_expected' => $action,
-                    'action_received' => $result['action'],
-                    'action_passed' => $actionCheck
-                ]);
 
                 return $scoreCheck && $actionCheck;
             }
