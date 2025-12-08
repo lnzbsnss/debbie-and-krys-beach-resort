@@ -25,6 +25,7 @@ class StorePaymentRequest extends FormRequest
             'reference_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp'],
             'notes' => ['nullable', 'string'],
             'payment_date' => ['required', 'date'],
+            'status' => ['in:pending,approved,rejected'],
         ];
     }
 

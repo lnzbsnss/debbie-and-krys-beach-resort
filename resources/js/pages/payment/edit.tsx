@@ -1,3 +1,4 @@
+// resources/js/pages/payment/edit.tsx
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +13,10 @@ import { Link } from '@inertiajs/react';
 import { type Payment, type PaymentAccount, type PageProps } from '@/types';
 import { format } from 'date-fns';
 import payments from '@/routes/payments';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function Edit({ payment, payment_accounts }: PageProps & { payment: Payment; payment_accounts: PaymentAccount[] }) {
+    const { isCustomer } = useAuth();
     const [currentImage, setCurrentImage] = useState<string | null>(payment.reference_image_url);
     const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
 
@@ -29,7 +32,6 @@ export default function Edit({ payment, payment_accounts }: PageProps & { paymen
         _method: 'PUT',
     });
 
-    // Check if down payment is fully paid (excluding current payment being edited)
     const isDownPaymentFullyPaid = useMemo(() => {
         if (!payment.booking?.down_payment_required) return false;
 
@@ -37,7 +39,6 @@ export default function Edit({ payment, payment_accounts }: PageProps & { paymen
         const downPaymentAmount = parseFloat(booking.down_payment_amount || '0');
         const downPaymentPaid = parseFloat(booking.down_payment_paid);
 
-        // Calculate down payment paid excluding current payment if it's a down payment
         const otherDownPaymentsPaid = payment.is_down_payment
             ? downPaymentPaid - parseFloat(payment.amount)
             : downPaymentPaid;
@@ -45,7 +46,6 @@ export default function Edit({ payment, payment_accounts }: PageProps & { paymen
         return otherDownPaymentsPaid >= downPaymentAmount;
     }, [payment]);
 
-    // Auto-check down payment if already fully paid
     useEffect(() => {
         if (isDownPaymentFullyPaid && payment.booking?.down_payment_required && !payment.is_down_payment) {
             setData('is_down_payment', true);
@@ -96,6 +96,16 @@ export default function Edit({ payment, payment_accounts }: PageProps & { paymen
                     <p className="text-sm text-muted-foreground">{payment.payment_number}</p>
                 </div>
             </div>
+
+            {payment.status === 'pending' && isCustomer() && (
+                <Card className="border-yellow-200 bg-yellow-50/50">
+                    <CardContent className="py-3">
+                        <p className="text-sm text-yellow-800">
+                            This payment is pending approval. You can still edit it before approval.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
 
             <Card>
                 <CardHeader className="pb-3">

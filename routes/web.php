@@ -35,6 +35,12 @@ Route::post('/faq/search', [FAQSearchController::class, 'search'])->name('faq.se
 Route::post('/faq-search/{faqSearch}/feedback', [FAQSearchController::class, 'feedback'])->name('faq.feedback');
 Route::get('/faq/popular', [FAQSearchController::class, 'popularQuestions']);
 
+Route::get('/book', [App\Http\Controllers\PublicBookingController::class, 'create'])->name('booking.public');
+Route::post('/bookings/public', [App\Http\Controllers\PublicBookingController::class, 'store'])->name('bookings.public.store');
+
+Route::get('/api/availability', [App\Http\Controllers\API\AvailabilityController::class, 'check']);
+Route::get('/api/availability/month', [App\Http\Controllers\API\AvailabilityController::class, 'checkMonth']);
+
 Route::middleware(['auth', 'verified', 'check.user.status'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -80,6 +86,8 @@ Route::middleware(['auth', 'verified', 'check.user.status'])->group(function () 
 
     // Payments
     Route::resource('payments', PaymentController::class);
+    Route::post('payments/{payment}/approve', [PaymentController::class, 'approve'])->name('payments.approve');
+    Route::post('payments/{payment}/reject', [PaymentController::class, 'reject'])->name('payments.reject');
     Route::get('/payments/{payment}/reference-image', [PaymentController::class, 'showReferenceImage'])
         ->name('payment.reference-image');
 

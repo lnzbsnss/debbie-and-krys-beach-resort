@@ -21,6 +21,8 @@ export interface Payment {
     reference_image_url: string | null;
     notes: string | null;
     payment_date: string;
+    status: 'pending' | 'approved' | 'rejected';
+    created_by: number;
     received_by: number;
     created_at: string;
     updated_at: string;
@@ -30,6 +32,7 @@ export interface Payment {
     rebooking?: Rebooking;
     payment_account?: PaymentAccount;
     received_by_user?: User;
+    created_by_user?: User;
     refunds?: Refund[];
 
     // Computed properties

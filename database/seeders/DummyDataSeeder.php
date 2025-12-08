@@ -108,7 +108,7 @@ class DummyDataSeeder extends Seeder
 
         // 1 Small Room with AC - Day Tour Only
         $smallRoom = Accommodation::create([
-            'name' => 'Small Room',
+            'name' => 'Small Room 1',
             'type' => 'room',
             'size' => 'small',
             'description' => 'Cozy airconditioned room with free small cottage',
@@ -209,6 +209,7 @@ class DummyDataSeeder extends Seeder
                 'sort_order' => 6 + $i,
             ]);
 
+            // Add OVERNIGHT rate (original)
             AccommodationRate::create([
                 'accommodation_id' => $bigCottage->id,
                 'booking_type' => 'overnight',
@@ -216,6 +217,20 @@ class DummyDataSeeder extends Seeder
                 'additional_pax_rate' => 0,
                 'adult_entrance_fee' => 150,
                 'child_entrance_fee' => 100,
+                'child_max_age' => 5,
+                'includes_free_cottage' => false,
+                'includes_free_entrance' => false,
+                'is_active' => true,
+            ]);
+
+            // ADD Day Tour rate so they can be used for day tour too
+            AccommodationRate::create([
+                'accommodation_id' => $bigCottage->id,
+                'booking_type' => 'day_tour',
+                'rate' => 800,
+                'additional_pax_rate' => 0,
+                'adult_entrance_fee' => 100,
+                'child_entrance_fee' => 50,
                 'child_max_age' => 5,
                 'includes_free_cottage' => false,
                 'includes_free_entrance' => false,
@@ -240,6 +255,7 @@ class DummyDataSeeder extends Seeder
                 'sort_order' => 12 + $i,
             ]);
 
+            // Add OVERNIGHT rate (original)
             AccommodationRate::create([
                 'accommodation_id' => $smallCottage->id,
                 'booking_type' => 'overnight',
@@ -247,6 +263,20 @@ class DummyDataSeeder extends Seeder
                 'additional_pax_rate' => 0,
                 'adult_entrance_fee' => 150,
                 'child_entrance_fee' => 100,
+                'child_max_age' => 5,
+                'includes_free_cottage' => false,
+                'includes_free_entrance' => false,
+                'is_active' => true,
+            ]);
+
+            // ADD Day Tour rate so they can be used for day tour too
+            AccommodationRate::create([
+                'accommodation_id' => $smallCottage->id,
+                'booking_type' => 'day_tour',
+                'rate' => 400,
+                'additional_pax_rate' => 0,
+                'adult_entrance_fee' => 100,
+                'child_entrance_fee' => 50,
                 'child_max_age' => 5,
                 'includes_free_cottage' => false,
                 'includes_free_entrance' => false,
@@ -295,13 +325,6 @@ class DummyDataSeeder extends Seeder
                 'account_number' => '0987654321',
                 'bank_name' => 'BPI',
                 'sort_order' => 4,
-            ],
-            [
-                'type' => 'other',
-                'account_name' => 'Cash on Hand',
-                'account_number' => null,
-                'bank_name' => null,
-                'sort_order' => 5,
             ],
         ];
 
@@ -397,8 +420,18 @@ class DummyDataSeeder extends Seeder
                 ]);
             }
 
-            // Payments
+            // Payments with different statuses
             if ($paidAmount > 0) {
+                // Determine who created the payment and its status
+                $isCustomerPayment = $i % 3 === 0; // Every 3rd payment is from customer
+                $paymentStatus = 'approved'; // Default for admin/staff payments
+
+                if ($isCustomerPayment) {
+                    // Customer payments can be pending, approved, or rejected
+                    $statusOptions = ['pending', 'approved', 'rejected'];
+                    $paymentStatus = $statusOptions[array_rand($statusOptions)];
+                }
+
                 $payment = Payment::create([
                     'booking_id' => $booking->id,
                     'payment_number' => 'PAY-' . date('Ym') . '-' . str_pad($i, 4, '0', STR_PAD_LEFT),
@@ -408,12 +441,14 @@ class DummyDataSeeder extends Seeder
                     'payment_account_id' => $createdPaymentAccounts[array_rand($createdPaymentAccounts)]->id,
                     'reference_number' => 'REF' . rand(100000, 999999),
                     'notes' => $i % 2 === 0 ? "Payment note {$i}" : null,
-                    'received_by' => [$admin->id, $staff->id][array_rand([$admin->id, $staff->id])],
+                    'created_by' => $isCustomerPayment ? $customer->id : [$admin->id, $staff->id][array_rand([$admin->id, $staff->id])],
+                    'received_by' => $paymentStatus === 'approved' ? [$admin->id, $staff->id][array_rand([$admin->id, $staff->id])] : null,
+                    'status' => $paymentStatus,
                     'payment_date' => now()->subDays(rand(0, 30)),
                 ]);
 
-                // Some payments have refunds
-                if ($i % 4 === 0) {
+                // Some payments have refunds (only for approved payments)
+                if ($i % 4 === 0 && $paymentStatus === 'approved') {
                     Refund::create([
                         'payment_id' => $payment->id,
                         'refund_number' => 'REF-' . date('Ym') . '-' . str_pad($i, 4, '0', STR_PAD_LEFT),
@@ -505,6 +540,7 @@ class DummyDataSeeder extends Seeder
 
             Feedback::create([
                 'booking_id' => $bookings[array_rand($bookings)]->id,
+                'created_by' => $customer->id,
                 'guest_name' => $customer->name,
                 'guest_email' => $customer->email,
                 'guest_phone' => $customer->phone,

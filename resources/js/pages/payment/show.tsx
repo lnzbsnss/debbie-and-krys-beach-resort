@@ -1,16 +1,18 @@
+// resources/js/pages/payment/show.tsx
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { type Payment, type PageProps } from '@/types';
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, Edit, QrCode, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Edit, QrCode, CheckCircle, XCircle, LoaderCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useState } from 'react';
+import { router } from '@inertiajs/react';
 import payments from '@/routes/payments';
 import bookings from '@/routes/bookings';
-import rebookings from '@/routes/rebookings';
 import refunds from '@/routes/refunds';
+import { useAuth } from '@/hooks/use-auth';
 
 const paymentMethodLabels: Record<string, string> = {
     cash: 'Cash',
@@ -28,12 +30,43 @@ const paymentMethodColors: Record<string, string> = {
     other: 'bg-gray-100 text-gray-800',
 };
 
-import { useAuth } from '@/hooks/use-auth';
-
 export default function Show({ payment }: PageProps & { payment: Payment }) {
-    const { can, isAdmin, isStaff } = useAuth();
+    const { can, user, isAdmin, isStaff } = useAuth();
     const [imageModalOpen, setImageModalOpen] = useState(false);
     const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [isApproving, setIsApproving] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
+
+    const handleApprove = () => {
+        setIsApproving(true);
+        router.post(payments.approve.url({ payment: payment.id }), {}, {
+            onFinish: () => setIsApproving(false)
+        });
+    };
+
+    const handleReject = () => {
+        setIsRejecting(true);
+        router.post(payments.reject.url({ payment: payment.id }), {}, {
+            onFinish: () => setIsRejecting(false)
+        });
+    };
+
+    const getStatusBadge = (status: string) => {
+        const variants: Record<string, 'default' | 'secondary' | 'destructive'> = {
+            pending: 'secondary',
+            approved: 'default',
+            rejected: 'destructive',
+        };
+
+        return (
+            <Badge variant={variants[status] || 'secondary'} className="capitalize text-xs">
+                {status}
+            </Badge>
+        );
+    };
+
+    const isOwner = payment.booking?.created_by === user?.id;
+    const canEdit = payment.status === 'pending' && (isAdmin() || isStaff() || isOwner) && can('payment edit');
 
     return (
         <div className="space-y-4">
@@ -49,44 +82,61 @@ export default function Show({ payment }: PageProps & { payment: Payment }) {
                         <p className="text-sm text-muted-foreground">Payment details</p>
                     </div>
                 </div>
-                {/* Only admin/staff can edit */}
-                {(isAdmin() || isStaff()) && can('payment edit') && (
-                    <Link href={payments.edit.url({ payment: payment.id })}>
-                        <Button size="sm">
-                            <Edit className="mr-1.5 h-3.5 w-3.5" />
-                            Edit
-                        </Button>
-                    </Link>
-                )}
+                <div className="flex gap-2">
+                    {payment.status === 'pending' && (isAdmin() || isStaff()) && can('payment edit') && (
+                        <>
+                            <Button size="sm" onClick={handleApprove} disabled={isApproving}>
+                                {isApproving ? (
+                                    <LoaderCircle className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                ) : (
+                                    <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                                )}
+                                Approve
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={handleReject} disabled={isRejecting}>
+                                {isRejecting ? (
+                                    <LoaderCircle className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                ) : (
+                                    <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                                )}
+                                Reject
+                            </Button>
+                        </>
+                    )}
+
+                    {canEdit && (
+                        <Link href={payments.edit.url({ payment: payment.id })}>
+                            <Button size="sm" variant="outline">
+                                <Edit className="h-3.5 w-3.5 mr-1.5" />
+                                Edit
+                            </Button>
+                        </Link>
+                    )}
+                </div>
             </div>
 
-            {/* {payment.is_rebooking_payment && payment.rebooking && (
-                <Card className="border-purple-200 bg-purple-50/50">
-                    <CardHeader className="pb-3">
-                        <CardTitle className="text-base font-medium flex items-center gap-2">
-                            <RefreshCw className="h-4 w-4" />
-                            Rebooking Payment
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Rebooking Number:</span>
-                            <Link
-                                href={rebookings.show.url({ rebooking: payment.rebooking_id! })}
-                                className="font-medium text-primary hover:underline"
-                            >
-                                {payment.rebooking.rebooking_number}
-                            </Link>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Status:</span>
-                            <Badge variant="outline" className="text-xs capitalize">
-                                {payment.rebooking.status}
-                            </Badge>
-                        </div>
+            {payment.status === 'pending' && (
+                <Card className="border-yellow-200 bg-yellow-50/50">
+                    <CardContent className="py-3">
+                        <p className="text-sm text-yellow-800">
+                            {isOwner
+                                ? 'This payment is pending approval from staff.'
+                                : 'This payment is pending approval.'
+                            }
+                        </p>
                     </CardContent>
                 </Card>
-            )} */}
+            )}
+
+            {payment.status === 'rejected' && (
+                <Card className="border-red-200 bg-red-50/50">
+                    <CardContent className="py-3">
+                        <p className="text-sm text-red-800">
+                            This payment has been rejected.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
 
             {payment.reference_image_url && (
                 <Card>
@@ -120,17 +170,16 @@ export default function Show({ payment }: PageProps & { payment: Payment }) {
                             <p className="text-sm font-medium">{payment.payment_number}</p>
                         </div>
                         <div>
+                            <p className="text-xs text-muted-foreground mb-0.5">Status</p>
+                            {getStatusBadge(payment.status)}
+                        </div>
+                        <div>
                             <p className="text-xs text-muted-foreground mb-0.5">Amount</p>
                             <div className="flex items-center gap-2 flex-wrap">
                                 <p className="text-xl font-bold">₱{parseFloat(payment.amount).toLocaleString()}</p>
                                 {payment.is_down_payment && (
                                     <Badge variant="outline" className="bg-blue-100 text-blue-800">
                                         Down Payment
-                                    </Badge>
-                                )}
-                                {payment.is_rebooking_payment && (
-                                    <Badge variant="outline" className="bg-purple-100 text-purple-800">
-                                        Rebooking
                                     </Badge>
                                 )}
                             </div>
@@ -304,18 +353,24 @@ export default function Show({ payment }: PageProps & { payment: Payment }) {
                 </Card>
             )}
 
-            {payment.received_by_user && (
+            {payment.created_by_user && (
                 <Card>
                     <CardHeader className="pb-3">
                         <CardTitle className="text-base font-medium">Additional Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <div>
-                            <p className="text-xs text-muted-foreground mb-0.5">Received By</p>
-                            <p className="text-sm font-medium">{payment.received_by_user.name}</p>
+                            <p className="text-xs text-muted-foreground mb-0.5">Submitted By</p>
+                            <p className="text-sm font-medium">{payment.created_by_user.name}</p>
                         </div>
+                        {payment.received_by_user && payment.status === 'approved' && (
+                            <div>
+                                <p className="text-xs text-muted-foreground mb-0.5">Approved By</p>
+                                <p className="text-sm font-medium">{payment.received_by_user.name}</p>
+                            </div>
+                        )}
                         <div>
-                            <p className="text-xs text-muted-foreground mb-0.5">Recorded At</p>
+                            <p className="text-xs text-muted-foreground mb-0.5">Submitted At</p>
                             <p className="text-sm font-medium">
                                 {format(new Date(payment.created_at), 'MMMM dd, yyyy HH:mm')}
                             </p>

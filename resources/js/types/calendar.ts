@@ -9,15 +9,16 @@ export interface CalendarBooking {
 }
 
 export interface AccommodationRate {
-    rate: number;
-    additional_pax_rate: number;
-    adult_entrance_fee: number;
-    child_entrance_fee: number;
+    id?: number;
+    rate: number | string; // Can be number or string from backend
+    additional_pax_rate: number | string;
+    adult_entrance_fee: number | string;
+    child_entrance_fee: number | string;
     child_max_age: number;
     includes_free_cottage: boolean;
     includes_free_entrance: boolean;
-    is_available: boolean;
-    booking: CalendarBooking | null;
+    is_available?: boolean; // Optional for calendar view
+    booking?: CalendarBooking | null; // Optional for calendar view
 }
 
 export interface CalendarAccommodation {
@@ -31,6 +32,14 @@ export interface CalendarAccommodation {
     first_image_url: string | null;
     day_tour_rate: AccommodationRate | null;
     overnight_rate: AccommodationRate | null;
+}
+
+// Add this new interface for public booking
+export interface AccommodationWithAvailability extends CalendarAccommodation {
+    description: string | null;
+    rates?: AccommodationRate[];
+    day_tour_available: boolean;
+    overnight_available: boolean;
 }
 
 export interface DayOverview {

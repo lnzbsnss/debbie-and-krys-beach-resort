@@ -49,10 +49,11 @@ class DashboardController extends Controller
             ->toArray();
 
         // Financial Statistics
-        $monthlyRevenue = Payment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+        $monthlyRevenue = Payment::where('status', 'approved')
+            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
             ->sum('amount');
 
-        $totalRevenue = Payment::sum('amount');
+        $totalRevenue = Payment::where('status', 'approved')->sum('amount');
 
         $unpaidBookingsData = Booking::select('id', 'total_amount', 'paid_amount')
             ->where('status', '!=', 'cancelled')
@@ -64,7 +65,14 @@ class DashboardController extends Controller
             return $booking->total_amount - $booking->paid_amount;
         });
 
-        $paymentsThisMonth = Payment::whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+        $paymentsThisMonth = Payment::where('status', 'approved')
+            ->whereBetween('payment_date', [$startOfMonth, $endOfMonth])
+            ->count();
+
+        // Payment Statistics
+        $pendingPayments = Payment::where('status', 'pending')->count();
+        $approvedPaymentsToday = Payment::where('status', 'approved')
+            ->whereDate('created_at', $today)
             ->count();
 
         // Rebooking Statistics
@@ -122,6 +130,10 @@ class DashboardController extends Controller
                     'total_unpaid_amount' => (float) $totalUnpaidAmount,
                     'payments_this_month' => $paymentsThisMonth,
                 ],
+                'payments' => [
+                    'pending' => $pendingPayments,
+                    'approved_today' => $approvedPaymentsToday,
+                ],
                 'rebookings' => [
                     'pending' => $pendingRebookings,
                     'approved' => $approvedRebookings,
@@ -161,9 +173,10 @@ class DashboardController extends Controller
             ->where('status', 'checked_out')
             ->count();
 
-        $totalSpent = Payment::whereHas('booking', function ($query) use ($userId) {
-            $query->where('created_by', $userId);
-        })->sum('amount');
+        $totalSpent = Payment::where('status', 'approved')
+            ->whereHas('booking', function ($query) use ($userId) {
+                $query->where('created_by', $userId);
+            })->sum('amount');
 
         $unpaidBookingsData = Booking::where('created_by', $userId)
             ->where('status', '!=', 'cancelled')
@@ -174,6 +187,12 @@ class DashboardController extends Controller
         $unpaidAmount = $unpaidBookingsData->sum(function($booking) {
             return $booking->total_amount - $booking->paid_amount;
         });
+
+        // Customer payment statistics
+        $pendingPayments = Payment::where('status', 'pending')
+            ->whereHas('booking', function ($query) use ($userId) {
+                $query->where('created_by', $userId);
+            })->count();
 
         $recentBookings = Booking::where('created_by', $userId)
             ->with(['accommodations.accommodation'])
@@ -205,6 +224,9 @@ class DashboardController extends Controller
                     'total_spent' => (float) $totalSpent,
                     'unpaid_amount' => (float) $unpaidAmount,
                 ],
+                'payments' => [
+                    'pending' => $pendingPayments,
+                ],
                 'rebookings' => [
                     'pending' => $pendingRebookings,
                 ],
@@ -221,7 +243,9 @@ class DashboardController extends Controller
 
         for ($i = 0; $i < $days; $i++) {
             $date = $startDate->copy()->addDays($i);
-            $revenue = Payment::whereDate('payment_date', $date)->sum('amount');
+            $revenue = Payment::where('status', 'approved')
+                ->whereDate('payment_date', $date)
+                ->sum('amount');
 
             $data[] = [
                 'date' => $date->format('M d'),

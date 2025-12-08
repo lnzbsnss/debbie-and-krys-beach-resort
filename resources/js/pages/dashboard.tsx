@@ -1,4 +1,3 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type DashboardProps } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -7,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import {
     Calendar,
     DollarSign,
-    Users,
     Home,
     TrendingUp,
     AlertCircle,
@@ -15,13 +13,11 @@ import {
     Clock,
     Star,
     FileText,
-    Megaphone,
     ArrowRight
 } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { format } from 'date-fns';
 import bookings from '@/routes/bookings';
-import { Button } from '@/components/ui/button';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -39,7 +35,6 @@ export default function Dashboard({
 }: DashboardProps) {
     const { user, isAdmin, isStaff, isCustomer } = useAuth();
 
-    // Type guard to check if stats is AdminDashboardStats
     const isAdminStats = (stats: any): stats is import('@/types').AdminDashboardStats => {
         return 'accommodations' in stats;
     };
@@ -99,11 +94,11 @@ export default function Dashboard({
                                     <CardTitle className="text-sm font-medium text-muted-foreground">
                                         Unpaid Balance
                                     </CardTitle>
-                                    <AlertCircle className="h-4 w-4 text-orange-500" />
+                                    <AlertCircle className="h-4 w-4" />
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="text-2xl font-bold text-orange-600">
+                                <div className="text-2xl font-bold">
                                     ₱{Number(stats.financial.unpaid_amount || 0).toLocaleString()}
                                 </div>
                                 <p className="text-xs text-muted-foreground mt-1">
@@ -215,11 +210,11 @@ export default function Dashboard({
                                 <CardTitle className="text-sm font-medium text-muted-foreground">
                                     Monthly Revenue
                                 </CardTitle>
-                                <TrendingUp className="h-4 w-4 text-green-600" />
+                                <TrendingUp className="h-4 w-4" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-green-600">
+                            <div className="text-2xl font-bold">
                                 ₱{isAdminStats(stats) ? Number(stats.financial.monthly_revenue || 0).toLocaleString() : 0}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -234,11 +229,11 @@ export default function Dashboard({
                                 <CardTitle className="text-sm font-medium text-muted-foreground">
                                     Unpaid Balance
                                 </CardTitle>
-                                <AlertCircle className="h-4 w-4 text-orange-500" />
+                                <AlertCircle className="h-4 w-4" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-orange-600">
+                            <div className="text-2xl font-bold">
                                 ₱{isAdminStats(stats) ? Number(stats.financial.total_unpaid_amount || 0).toLocaleString() : 0}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -253,11 +248,11 @@ export default function Dashboard({
                                 <CardTitle className="text-sm font-medium text-muted-foreground">
                                     Check-ins Today
                                 </CardTitle>
-                                <CheckCircle className="h-4 w-4 text-blue-600" />
+                                <CheckCircle className="h-4 w-4" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-blue-600">
+                            <div className="text-2xl font-bold">
                                 {isAdminStats(stats) ? stats.bookings.checked_in_today : 0}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -267,7 +262,6 @@ export default function Dashboard({
                     </Card>
                 </div>
 
-                {/* Stats Grid - Row 2: Accommodations & Others */}
                 <div className="grid gap-4 md:grid-cols-4">
                     <Card>
                         <CardHeader className="pb-3">
@@ -288,24 +282,43 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    {/* <Card>
                         <CardHeader className="pb-3">
                             <div className="flex items-center justify-between">
                                 <CardTitle className="text-sm font-medium text-muted-foreground">
                                     Pending Rebookings
                                 </CardTitle>
-                                <Clock className="h-4 w-4 text-orange-500" />
+                                <Clock className="h-4 w-4" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-orange-600">
+                            <div className="text-2xl font-bold">
                                 {isAdminStats(stats) ? stats.rebookings.pending : 0}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Needs review
                             </p>
                         </CardContent>
-                    </Card>
+                    </Card> */}
+
+                    {/* <Card>
+                        <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">
+                                    Pending Payments
+                                </CardTitle>
+                                <Clock className="h-4 w-4" />
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {isAdminStats(stats) && 'payments' in stats ? stats.payments.pending : 0}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Needs approval
+                            </p>
+                        </CardContent>
+                    </Card> */}
 
                     <Card>
                         <CardHeader className="pb-3">
@@ -313,11 +326,11 @@ export default function Dashboard({
                                 <CardTitle className="text-sm font-medium text-muted-foreground">
                                     Average Rating
                                 </CardTitle>
-                                <Star className="h-4 w-4 text-yellow-500" />
+                                <Star className="h-4 w-4" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-yellow-600">
+                            <div className="text-2xl font-bold">
                                 {isAdminStats(stats) ? Number(stats.feedback.average_rating || 0).toFixed(1) : 0}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -351,11 +364,11 @@ export default function Dashboard({
                                 <CardTitle className="text-sm font-medium text-muted-foreground">
                                     Total Revenue
                                 </CardTitle>
-                                <DollarSign className="h-4 w-4 text-green-600" />
+                                <DollarSign className="h-4 w-4" />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-green-600">
+                            <div className="text-2xl font-bold">
                                 ₱{isAdminStats(stats) ? Number(stats.financial.total_revenue || 0).toLocaleString() : 0}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">

@@ -132,8 +132,15 @@ class Booking extends Model
 
     public function updatePaidAmount(): void
     {
-        $totalPaid = $this->payments()->sum('amount');
-        $downPaymentPaid = $this->payments()->where('is_down_payment', true)->sum('amount');
+        // Only sum approved payments
+        $totalPaid = $this->payments()
+            ->where('status', 'approved')
+            ->sum('amount');
+
+        $downPaymentPaid = $this->payments()
+            ->where('status', 'approved')
+            ->where('is_down_payment', true)
+            ->sum('amount');
 
         $this->update([
             'paid_amount' => $totalPaid,

@@ -241,14 +241,16 @@ class PermissionRoleUserSeeder extends Seeder
             // Bookings - Create and view own, edit only pending
             'booking show',
             'booking create',
-            'booking edit', // Can edit but only pending bookings (enforced in controller)
+            'booking edit',
 
             // Rebookings - Can request rebooking for own bookings
             'rebooking show',
             'rebooking create',
 
-            // Payments - Can view own payments only
+            // Payments - Create and view own, edit only pending
             'payment show',
+            'payment create',
+            'payment edit',
 
             // Refunds - Can view own refunds only
             'refund show',
@@ -272,7 +274,7 @@ class PermissionRoleUserSeeder extends Seeder
             [
                 'name' => 'Customer User',
                 'phone' => '09987654321',
-                'address' => 'Customer Address',
+                'address' => 'Bauan, Batangas',
                 'email_verified_at' => now(),
                 'password' => Hash::make('P@ssw0rd'),
                 'password_changed_at' => now(),

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { type PaymentIndexProps, type Payment } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Plus, Banknote, Eye, Edit, Trash2, ImageIcon, RefreshCw } from 'lucide-react';
+import { Plus, Banknote, Eye, Edit, Trash2, ImageIcon } from 'lucide-react';
 import { router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -21,12 +21,11 @@ import {
 import { format } from 'date-fns';
 import payments from '@/routes/payments';
 import bookings from '@/routes/bookings';
-import rebookings from '@/routes/rebookings';
 
 import { useAuth } from '@/hooks/use-auth';
 
 export default function Index({ payments: paymentData }: PaymentIndexProps) {
-    const { can, user, isAdmin, isStaff } = useAuth();
+    const { can, user, isAdmin, isStaff, isCustomer } = useAuth();
     const [deleteId, setDeleteId] = useState<number | null>(null);
 
     const handleDelete = () => {
@@ -37,12 +36,26 @@ export default function Index({ payments: paymentData }: PaymentIndexProps) {
         }
     };
 
+    const getStatusBadge = (status: string) => {
+        const variants: Record<string, 'default' | 'secondary' | 'destructive'> = {
+            pending: 'secondary',
+            approved: 'default',
+            rejected: 'destructive',
+        };
+
+        return (
+            <Badge variant={variants[status] || 'secondary'} className="capitalize text-xs">
+                {status}
+            </Badge>
+        );
+    };
+
     const getPaymentMethodBadge = (method: string) => {
         const colors: Record<string, string> = {
-            cash: 'bg-green-100 text-green-800',
-            bank: 'bg-purple-100 text-purple-800',
-            gcash: 'bg-teal-100 text-teal-800',
-            maya: 'bg-orange-100 text-orange-800',
+            cash: 'bg-gray-100 text-gray-800',
+            bank: 'bg-gray-100 text-gray-800',
+            gcash: 'bg-gray-100 text-gray-800',
+            maya: 'bg-gray-100 text-gray-800',
             other: 'bg-gray-100 text-gray-800',
         };
 
@@ -53,6 +66,21 @@ export default function Index({ payments: paymentData }: PaymentIndexProps) {
         );
     };
 
+    // Permission check helper for payment ownership
+    const canEditPayment = (payment: Payment) => {
+        if (!can('payment edit')) return false;
+        if (isAdmin() || isStaff()) return true;
+        // Customer can only edit pending payments they created
+        return payment.booking?.created_by === user?.id && payment.status === 'pending';
+    };
+
+    const canDeletePayment = (payment: Payment) => {
+        if (!can('payment delete')) return false;
+        if (isAdmin() || isStaff()) return true;
+        // Customer can only delete pending payments they created
+        return payment.booking?.created_by === user?.id && payment.status === 'pending';
+    };
+
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -60,12 +88,11 @@ export default function Index({ payments: paymentData }: PaymentIndexProps) {
                     <h1 className="text-xl font-semibold">Payments</h1>
                     <p className="text-sm text-muted-foreground">Manage booking payments</p>
                 </div>
-                {/* Only admin/staff can create */}
-                {(isAdmin() || isStaff()) && can('payment create') && (
+                {can('payment create') && (
                     <Link href={payments.create.url()}>
                         <Button size="sm">
                             <Plus className="mr-1.5 h-3.5 w-3.5" />
-                            Record Payment
+                            {isCustomer() ? 'Submit Payment' : 'Record Payment'}
                         </Button>
                     </Link>
                 )}
@@ -86,7 +113,7 @@ export default function Index({ payments: paymentData }: PaymentIndexProps) {
                                 <TableHead>Guest</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Method</TableHead>
-                                <TableHead>Account</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead className="w-32 text-right">Actions</TableHead>
                             </TableRow>
@@ -103,77 +130,50 @@ export default function Index({ payments: paymentData }: PaymentIndexProps) {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        {/* {payment.rebooking_id ? (
-                                            <Link
-                                                href={rebookings.show.url({ rebooking: payment.rebooking_id })}
-                                                className="text-primary hover:underline text-sm flex items-center gap-1"
-                                            >
-                                                <RefreshCw className="h-3 w-3" />
-                                                {payment.rebooking?.rebooking_number}
-                                            </Link>
-                                        ) : ( */}
-                                            <Link
-                                                href={bookings.show.url({ booking: payment.booking_id })}
-                                                className="text-primary hover:underline text-sm"
-                                            >
-                                                {payment.booking?.booking_number}
-                                            </Link>
-                                        {/* )} */}
+                                        <Link
+                                            href={bookings.show.url({ booking: payment.booking_id })}
+                                            className="text-primary hover:underline text-sm"
+                                        >
+                                            {payment.booking?.booking_number}
+                                        </Link>
                                     </TableCell>
                                     <TableCell className="text-sm">{payment.booking?.guest_name}</TableCell>
                                     <TableCell className="font-medium text-sm">
-                                        <div className="flex items-center gap-1.5 flex-wrap">
-                                            <span>₱{parseFloat(payment.amount).toLocaleString()}</span>
-                                            {/* {payment.is_down_payment && (
-                                                <Badge variant="outline" className="bg-blue-100 text-blue-800 text-xs">
-                                                    DP
-                                                </Badge>
-                                            )} */}
-                                            {/* {payment.is_rebooking_payment && (
-                                                <Badge variant="outline" className="bg-purple-100 text-purple-800 text-xs">
-                                                    Rebooking
-                                                </Badge>
-                                            )} */}
-                                        </div>
+                                        ₱{parseFloat(payment.amount).toLocaleString()}
                                     </TableCell>
                                     <TableCell>
                                         {getPaymentMethodBadge(payment.payment_method)}
                                     </TableCell>
-                                    <TableCell className="text-sm">
-                                        {payment.payment_account ? (
-                                            <div className="text-xs">
-                                                <div className="font-medium">{payment.payment_account.account_name}</div>
-                                                {payment.payment_account.account_number && (
-                                                    <div className="text-muted-foreground">{payment.payment_account.account_number}</div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <span className="text-muted-foreground">-</span>
-                                        )}
-                                    </TableCell>
+                                    <TableCell>{getStatusBadge(payment.status)}</TableCell>
                                     <TableCell className="text-sm">
                                         {format(new Date(payment.payment_date), 'MMM dd, yyyy')}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-1">
-                                            <Link href={payments.show.url({ payment: payment.id })}>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                    <Eye className="h-3.5 w-3.5" />
+                                            {can('payment show') && (
+                                                <Link href={payments.show.url({ payment: payment.id })}>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                        <Eye className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                            {canEditPayment(payment) && (
+                                                <Link href={payments.edit.url({ payment: payment.id })}>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                        <Edit className="h-3.5 w-3.5" />
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                            {canDeletePayment(payment) && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8"
+                                                    onClick={() => setDeleteId(payment.id)}
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
                                                 </Button>
-                                            </Link>
-                                            <Link href={payments.edit.url({ payment: payment.id })}>
-                                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                    <Edit className="h-3.5 w-3.5" />
-                                                </Button>
-                                            </Link>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8"
-                                                onClick={() => setDeleteId(payment.id)}
-                                            >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                            </Button>
+                                            )}
                                         </div>
                                     </TableCell>
                                 </TableRow>

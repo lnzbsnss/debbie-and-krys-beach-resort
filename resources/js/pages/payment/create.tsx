@@ -7,33 +7,28 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Upload, X, RefreshCw, LoaderCircle } from 'lucide-react';
+import { FormEventHandler, useState, useMemo } from 'react';
+import { ArrowLeft, Upload, X, LoaderCircle } from 'lucide-react';
 import { Link } from '@inertiajs/react';
-import { type Booking, type Rebooking, type PaymentAccount, type PageProps } from '@/types';
+import { type Booking, type PaymentAccount, type PageProps } from '@/types';
 import { format } from 'date-fns';
 import payments from '@/routes/payments';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function Create({
     bookings,
-    rebookings,
     payment_accounts,
-    preselected_rebooking_id
 }: PageProps & {
     bookings: Booking[];
-    rebookings?: Rebooking[];
     payment_accounts: PaymentAccount[];
-    preselected_rebooking_id?: number;
 }) {
+    const { isCustomer, isAdmin, isStaff } = useAuth();
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [paymentType, setPaymentType] = useState<'booking' | 'rebooking'>('booking');
 
     const { data, setData, post, processing, errors } = useForm({
         booking_id: '',
-        rebooking_id: '',
         amount: '',
         is_down_payment: false,
-        is_rebooking_payment: false,
         payment_account_id: '',
         reference_number: '',
         reference_image: null as File | null,
@@ -42,45 +37,11 @@ export default function Create({
     });
 
     const selectedBooking = bookings.find((b) => b.id === parseInt(data.booking_id));
-    const selectedRebooking = rebookings?.find((r) => r.id === parseInt(data.rebooking_id));
 
-    // Check if down payment is fully paid
     const isDownPaymentFullyPaid = useMemo(() => {
         if (!selectedBooking?.down_payment_required) return false;
         return parseFloat(selectedBooking.down_payment_balance) <= 0;
     }, [selectedBooking]);
-
-    useEffect(() => {
-        if (paymentType === 'booking') {
-            setData({
-                ...data,
-                rebooking_id: '',
-                is_rebooking_payment: false,
-            });
-        } else {
-            setData({
-                ...data,
-                is_down_payment: false,
-                is_rebooking_payment: true,
-            });
-        }
-    }, [paymentType]);
-
-    useEffect(() => {
-        if (selectedRebooking) {
-            setData({
-                ...data,
-                booking_id: selectedRebooking.original_booking_id.toString(),
-            });
-        }
-    }, [data.rebooking_id]);
-
-    useEffect(() => {
-        if (preselected_rebooking_id && rebookings) {
-            setPaymentType('rebooking');
-            setData('rebooking_id', preselected_rebooking_id.toString());
-        }
-    }, [preselected_rebooking_id]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -116,39 +77,27 @@ export default function Create({
                     </Button>
                 </Link>
                 <div>
-                    <h1 className="text-xl font-semibold">Record Payment</h1>
-                    <p className="text-sm text-muted-foreground">Add a new payment record</p>
+                    <h1 className="text-xl font-semibold">
+                        {isCustomer() ? 'Submit Payment' : 'Record Payment'}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        {isCustomer()
+                            ? 'Submit payment for approval'
+                            : 'Add a new payment record'
+                        }
+                    </p>
                 </div>
             </div>
 
-            <Card>
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-medium">Payment Type</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex gap-2">
-                        <Button
-                            type="button"
-                            variant={paymentType === 'booking' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setPaymentType('booking')}
-                        >
-                            Booking Payment
-                        </Button>
-                        {/* {rebookings && rebookings.length > 0 && (
-                            <Button
-                                type="button"
-                                variant={paymentType === 'rebooking' ? 'default' : 'outline'}
-                                size="sm"
-                                onClick={() => setPaymentType('rebooking')}
-                            >
-                                <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                                Rebooking Payment
-                            </Button>
-                        )} */}
-                    </div>
-                </CardContent>
-            </Card>
+            {isCustomer() && (
+                <Card className="border-blue-200 bg-blue-50/50">
+                    <CardContent className="py-3">
+                        <p className="text-sm text-blue-800">
+                            Your payment will be reviewed by staff before being approved.
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
 
             <Card>
                 <CardHeader className="pb-3">
@@ -156,156 +105,100 @@ export default function Create({
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={submit} className="space-y-5">
-                        {/* {paymentType === 'booking' ? (
-                            <> */}
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="booking_id" className="text-sm cursor-text select-text">Booking</Label>
-                                    <Select value={data.booking_id} onValueChange={(value) => setData('booking_id', value)}>
-                                        <SelectTrigger className="h-9">
-                                            <SelectValue placeholder="Select booking" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {bookings.map((booking) => (
-                                                <SelectItem key={booking.id} value={booking.id.toString()}>
-                                                    {booking.booking_number} - {booking.guest_name} (Balance: ₱
-                                                    {parseFloat(booking.balance).toLocaleString()})
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.booking_id && <p className="text-xs text-destructive">{errors.booking_id}</p>}
+                        <div className="space-y-1.5">
+                            <Label htmlFor="booking_id" className="text-sm cursor-text select-text">Booking</Label>
+                            <Select value={data.booking_id} onValueChange={(value) => setData('booking_id', value)}>
+                                <SelectTrigger className="h-9">
+                                    <SelectValue placeholder="Select booking" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {bookings.map((booking) => (
+                                        <SelectItem key={booking.id} value={booking.id.toString()}>
+                                            {booking.booking_number} - {booking.guest_name} (Balance: ₱
+                                            {parseFloat(booking.balance).toLocaleString()})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {errors.booking_id && <p className="text-xs text-destructive">{errors.booking_id}</p>}
+                        </div>
+
+                        {selectedBooking && (
+                            <>
+                                <div className="rounded border p-3 bg-muted/30 space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">Guest:</span>
+                                        <span className="font-medium">{selectedBooking.guest_name}</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">Total:</span>
+                                        <span className="font-medium">
+                                            ₱{parseFloat(selectedBooking.total_amount).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-muted-foreground">Paid:</span>
+                                        <span className="font-medium text-green-600">
+                                            ₱{parseFloat(selectedBooking.paid_amount).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-sm border-t pt-2">
+                                        <span className="font-semibold">Balance:</span>
+                                        <span className="font-semibold text-red-600">
+                                            ₱{parseFloat(selectedBooking.balance).toLocaleString()}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                {selectedBooking && (
+                                {selectedBooking.down_payment_required && (
                                     <>
-                                        <div className="rounded border p-3 bg-muted/30 space-y-2">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Guest:</span>
-                                                <span className="font-medium">{selectedBooking.guest_name}</span>
+                                        <div className="space-y-1.5">
+                                            <div className="flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id="is_down_payment"
+                                                    checked={data.is_down_payment}
+                                                    onChange={(e) => setData('is_down_payment', e.target.checked)}
+                                                    disabled={isDownPaymentFullyPaid}
+                                                    className="h-4 w-4 rounded border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                />
+                                                <Label
+                                                    htmlFor="is_down_payment"
+                                                    className={`text-sm ${isDownPaymentFullyPaid ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                                                >
+                                                    This is a down payment
+                                                    {isDownPaymentFullyPaid && (
+                                                        <span className="text-xs text-green-600 ml-2">(Fully Paid)</span>
+                                                    )}
+                                                </Label>
                                             </div>
+                                            {errors.is_down_payment && <p className="text-xs text-destructive">{errors.is_down_payment}</p>}
+                                        </div>
+
+                                        <div className={`rounded border p-3 space-y-2 ${isDownPaymentFullyPaid ? 'bg-green-50 border-green-200' : 'bg-blue-50'}`}>
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Total:</span>
+                                                <span className="text-muted-foreground">Down Payment Required:</span>
                                                 <span className="font-medium">
-                                                    ₱{parseFloat(selectedBooking.total_amount).toLocaleString()}
+                                                    ₱{parseFloat(selectedBooking.down_payment_amount || '0').toLocaleString()}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Paid:</span>
+                                                <span className="text-muted-foreground">Down Payment Paid:</span>
                                                 <span className="font-medium text-green-600">
-                                                    ₱{parseFloat(selectedBooking.paid_amount).toLocaleString()}
+                                                    ₱{parseFloat(selectedBooking.down_payment_paid).toLocaleString()}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between text-sm border-t pt-2">
-                                                <span className="font-semibold">Balance:</span>
-                                                <span className="font-semibold text-red-600">
-                                                    ₱{parseFloat(selectedBooking.balance).toLocaleString()}
+                                                <span className="font-semibold">Down Payment Balance:</span>
+                                                <span className={`font-semibold ${isDownPaymentFullyPaid ? 'text-green-600' : 'text-red-600'}`}>
+                                                    ₱{parseFloat(selectedBooking.down_payment_balance).toLocaleString()}
                                                 </span>
                                             </div>
                                         </div>
-
-                                        {selectedBooking.down_payment_required && (
-                                            <>
-                                                <div className="space-y-1.5">
-                                                    <div className="flex items-center space-x-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            id="is_down_payment"
-                                                            checked={data.is_down_payment}
-                                                            onChange={(e) => setData('is_down_payment', e.target.checked)}
-                                                            disabled={isDownPaymentFullyPaid}
-                                                            className="h-4 w-4 rounded border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        />
-                                                        <Label
-                                                            htmlFor="is_down_payment"
-                                                            className={`text-sm ${isDownPaymentFullyPaid ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
-                                                        >
-                                                            This is a down payment
-                                                            {isDownPaymentFullyPaid && (
-                                                                <span className="text-xs text-green-600 ml-2">(Fully Paid)</span>
-                                                            )}
-                                                        </Label>
-                                                    </div>
-                                                    {errors.is_down_payment && <p className="text-xs text-destructive">{errors.is_down_payment}</p>}
-                                                </div>
-
-                                                <div className={`rounded border p-3 space-y-2 ${isDownPaymentFullyPaid ? 'bg-green-50 border-green-200' : 'bg-blue-50'}`}>
-                                                    <div className="flex justify-between text-sm">
-                                                        <span className="text-muted-foreground">Down Payment Required:</span>
-                                                        <span className="font-medium">
-                                                            ₱{parseFloat(selectedBooking.down_payment_amount || '0').toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between text-sm">
-                                                        <span className="text-muted-foreground">Down Payment Paid:</span>
-                                                        <span className="font-medium text-green-600">
-                                                            ₱{parseFloat(selectedBooking.down_payment_paid).toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between text-sm border-t pt-2">
-                                                        <span className="font-semibold">Down Payment Balance:</span>
-                                                        <span className={`font-semibold ${isDownPaymentFullyPaid ? 'text-green-600' : 'text-red-600'}`}>
-                                                            ₱{parseFloat(selectedBooking.down_payment_balance).toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )}
                                     </>
                                 )}
-                            {/* </>
-                        ) : (
-                            <>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="rebooking_id" className="text-sm cursor-text select-text">
-                                        <RefreshCw className="h-3.5 w-3.5 inline mr-1" />
-                                        Rebooking
-                                    </Label>
-                                    <Select value={data.rebooking_id} onValueChange={(value) => setData('rebooking_id', value)}>
-                                        <SelectTrigger className="h-9">
-                                            <SelectValue placeholder="Select rebooking" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {rebookings?.map((rebooking) => (
-                                                <SelectItem key={rebooking.id} value={rebooking.id.toString()}>
-                                                    {rebooking.rebooking_number} - {rebooking.original_booking?.guest_name} (Remaining: ₱
-                                                    {parseFloat(rebooking.remaining_payment || '0').toLocaleString()})
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.rebooking_id && <p className="text-xs text-destructive">{errors.rebooking_id}</p>}
-                                </div>
-
-                                {selectedRebooking && (
-                                    <div className="rounded border p-3 bg-purple-50 space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">Guest:</span>
-                                            <span className="font-medium">{selectedRebooking.original_booking?.guest_name}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">Total Adjustment:</span>
-                                            <span className="font-medium text-green-600">
-                                                +₱{parseFloat(selectedRebooking.total_adjustment).toLocaleString()}
-                                            </span>
-                                        </div>
-                                        {selectedRebooking.total_paid && parseFloat(selectedRebooking.total_paid) > 0 && (
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-muted-foreground">Already Paid:</span>
-                                                <span className="font-medium text-green-600">
-                                                    ₱{parseFloat(selectedRebooking.total_paid).toLocaleString()}
-                                                </span>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between text-sm border-t pt-2">
-                                            <span className="font-semibold">Remaining Payment:</span>
-                                            <span className="font-semibold text-red-600">
-                                                ₱{parseFloat(selectedRebooking.remaining_payment || '0').toLocaleString()}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
                             </>
-                        )} */}
+                        )}
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-1.5">
@@ -390,7 +283,7 @@ export default function Create({
                                 </div>
                             ) : (
                                 <>
-                                    <p className="text-xs text-muted-foreground mb-1.5">New Image</p>
+                                    <p className="text-xs text-muted-foreground mb-1.5">Preview</p>
                                     <div className="relative inline-block">
                                         <img
                                             src={imagePreview}
@@ -427,7 +320,7 @@ export default function Create({
                         <div className="flex gap-2 pt-2">
                             <Button type="submit" disabled={processing} size="sm">
                                 {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
-                                Record Payment
+                                {isCustomer() ? 'Submit Payment' : 'Record Payment'}
                             </Button>
                             <Link href={payments.index.url()}>
                                 <Button type="button" variant="outline" size="sm">

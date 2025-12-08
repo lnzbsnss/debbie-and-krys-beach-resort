@@ -1,6 +1,6 @@
 import { dashboard, login, register } from '@/routes';
 import { type PageProps, type Gallery, type Feedback, type Announcement, type Accommodation } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import { MapPin, Phone, Mail, Facebook, Star, Quote, ImageIcon, MessageSquare, Megaphone, X, ArrowUp, Hotel, Eye, ChevronDown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +30,19 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import { PublicBookingDialog } from '@/components/public-booking-dialog';
+
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
 interface WelcomeProps extends PageProps {
     latestAnnouncement: Announcement | null;
     galleries: Gallery[];
@@ -50,6 +63,9 @@ export default function Welcome() {
     const handleGalleryImageError = (galleryId: number) => {
         setGalleryImageErrors(prev => new Set(prev).add(galleryId));
     };
+
+    const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+    const [showAccountDialog, setShowAccountDialog] = useState(false);
 
     const openLightbox = (images: string[], index: number = 0) => {
         setLightboxImages(images);
@@ -83,6 +99,16 @@ export default function Welcome() {
                 ))}
             </div>
         );
+    };
+
+    const handleBookNowClick = () => {
+        if (auth.user) {
+            // If already logged in, go straight to booking
+            setBookingDialogOpen(true);
+        } else {
+            // Show account check dialog
+            setShowAccountDialog(true);
+        }
     };
 
     return (
@@ -229,12 +255,12 @@ export default function Welcome() {
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row gap-4 pt-2 sm:pt-4 w-full sm:w-auto">
-                                    <Link
-                                        href="/login"
-                                        className="inline-flex items-center justify-center px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-primary-foreground bg-primary border border-primary rounded-md hover:bg-primary/90 active:bg-primary/80 transition-all duration-200 shadow-md hover:shadow-lg"
+                                    <Button
+                                        onClick={handleBookNowClick}
+                                        className="inline-flex items-center justify-center px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-primary-foreground bg-primary border border-primary rounded-md hover:bg-primary/90 active:bg-primary/80 transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
                                     >
                                         Book Now
-                                    </Link>
+                                    </Button>
                                 </div>
                             </div>
                         </section>
@@ -779,6 +805,42 @@ export default function Welcome() {
             />
 
             <FAQChatbot />
+
+            <PublicBookingDialog
+                open={bookingDialogOpen}
+                onOpenChange={setBookingDialogOpen}
+            />
+
+            <AlertDialog open={showAccountDialog} onOpenChange={setShowAccountDialog}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl sm:text-2xl">Do you have an account?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm sm:text-base">
+                            If you already have an account, you can login to make booking faster. Otherwise, you can proceed as a guest and create an account during booking.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                        <AlertDialogCancel
+                            onClick={() => {
+                                setShowAccountDialog(false);
+                                setBookingDialogOpen(true);
+                            }}
+                            className="w-full sm:w-auto cursor-pointer"
+                        >
+                            Continue as Guest
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                setShowAccountDialog(false);
+                                router.visit(login());
+                            }}
+                            className="w-full sm:w-auto cursor-pointer"
+                        >
+                            Login to Account
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

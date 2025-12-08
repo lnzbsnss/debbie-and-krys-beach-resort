@@ -1,3 +1,5 @@
+// resources/js/types/feedback.ts
+
 import type { PaginatedData } from './datatable';
 import type { Booking } from './booking';
 import type { User } from './user';

@@ -21,13 +21,16 @@ return new class extends Migration
             $table->string('reference_image')->nullable();
             $table->text('notes')->nullable();
             $table->foreignId('received_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamp('payment_date');
             $table->timestamps();
 
             $table->index('booking_id', 'idx_payment_booking_id');
             $table->index('rebooking_id', 'idx_payment_rebooking_id');
             $table->index('payment_account_id', 'idx_payment_account_id');
-
+            $table->index('created_by', 'idx_payment_created_by');
+            $table->index('status', 'idx_payment_status');
             $table->index(['is_rebooking_payment', 'rebooking_id'], 'idx_payment_rebooking_flag');
             $table->index(['is_down_payment', 'booking_id'], 'idx_payment_down_payment');
             $table->index('payment_date', 'idx_payment_date');

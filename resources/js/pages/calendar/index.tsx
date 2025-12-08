@@ -107,7 +107,7 @@ export default function Index({ selectedDate, accommodations, monthOverview }: C
                         <CardTitle className="text-xs font-medium text-muted-foreground">Available</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-2xl font-bold text-green-600">{availableCount}</p>
+                        <p className="text-2xl font-bold ">{availableCount}</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -115,7 +115,7 @@ export default function Index({ selectedDate, accommodations, monthOverview }: C
                         <CardTitle className="text-xs font-medium text-muted-foreground">Booked</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-2xl font-bold text-red-600">{bookedCount}</p>
+                        <p className="text-2xl font-bold ">{bookedCount}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -187,8 +187,8 @@ export default function Index({ selectedDate, accommodations, monthOverview }: C
                                             <div className={cn(
                                                 'flex-1 p-2 rounded border',
                                                 accommodation.day_tour_rate.is_available
-                                                    ? 'bg-green-50 border-green-200'
-                                                    : 'bg-red-50 border-red-200'
+                                                    ? ' border-gray-200'
+                                                    : ' border-gray-200'
                                             )}>
                                                 <div className="flex items-center justify-between mb-1">
                                                     <p className="font-medium">Day Tour</p>
@@ -197,8 +197,8 @@ export default function Index({ selectedDate, accommodations, monthOverview }: C
                                                         className={cn(
                                                             'text-xs',
                                                             accommodation.day_tour_rate.is_available
-                                                                ? 'bg-green-100 text-green-800'
-                                                                : 'bg-red-100 text-red-800'
+                                                                ? ' '
+                                                                : ' '
                                                         )}
                                                     >
                                                         {accommodation.day_tour_rate.is_available ? 'Available' : 'Booked'}
@@ -211,13 +211,13 @@ export default function Index({ selectedDate, accommodations, monthOverview }: C
                                                     </p>
                                                     <p>Extra Pax: {formatCurrency(accommodation.day_tour_rate.additional_pax_rate)}</p>
                                                     {accommodation.day_tour_rate.includes_free_cottage && (
-                                                        <p className="text-green-600">Free Cottage</p>
+                                                        <p className="">Free Cottage</p>
                                                     )}
                                                     {accommodation.day_tour_rate.includes_free_entrance && (
-                                                        <p className="text-green-600">Free Entrance</p>
+                                                        <p className="">Free Entrance</p>
                                                     )}
                                                     {!accommodation.day_tour_rate.is_available && accommodation.day_tour_rate.booking && (
-                                                        <p className="text-red-600 font-medium mt-1">
+                                                        <p className=" font-medium mt-1">
                                                             {accommodation.day_tour_rate.booking.guest_name}
                                                         </p>
                                                     )}
@@ -228,8 +228,8 @@ export default function Index({ selectedDate, accommodations, monthOverview }: C
                                             <div className={cn(
                                                 'flex-1 p-2 rounded border',
                                                 accommodation.overnight_rate.is_available
-                                                    ? 'bg-green-50 border-green-200'
-                                                    : 'bg-red-50 border-red-200'
+                                                    ? ' border-gray-200'
+                                                    : ' border-gray-200'
                                             )}>
                                                 <div className="flex items-center justify-between mb-1">
                                                     <p className="font-medium">Overnight</p>
@@ -238,8 +238,8 @@ export default function Index({ selectedDate, accommodations, monthOverview }: C
                                                         className={cn(
                                                             'text-xs',
                                                             accommodation.overnight_rate.is_available
-                                                                ? 'bg-green-100 text-green-800'
-                                                                : 'bg-red-100 text-red-800'
+                                                                ? ' '
+                                                                : ' '
                                                         )}
                                                     >
                                                         {accommodation.overnight_rate.is_available ? 'Available' : 'Booked'}
@@ -252,13 +252,13 @@ export default function Index({ selectedDate, accommodations, monthOverview }: C
                                                     </p>
                                                     <p>Extra Pax: {formatCurrency(accommodation.overnight_rate.additional_pax_rate)}</p>
                                                     {accommodation.overnight_rate.includes_free_cottage && (
-                                                        <p className="text-green-600">Free Cottage</p>
+                                                        <p className="">Free Cottage</p>
                                                     )}
                                                     {accommodation.overnight_rate.includes_free_entrance && (
-                                                        <p className="text-green-600">Free Entrance</p>
+                                                        <p className="">Free Entrance</p>
                                                     )}
                                                     {!accommodation.overnight_rate.is_available && accommodation.overnight_rate.booking && (
-                                                        <p className="text-red-600 font-medium mt-1">
+                                                        <p className=" font-medium mt-1">
                                                             {accommodation.overnight_rate.booking.guest_name}
                                                         </p>
                                                     )}

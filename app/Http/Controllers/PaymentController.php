@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Mail;
 use App\Services\NotificationService;
 use App\Mail\PaymentReceived;
 use App\Mail\Admin\NewPaymentNotification;
+use App\Mail\PaymentApproved;
+use App\Mail\PaymentRejected;
 
 class PaymentController extends Controller
 {
@@ -34,7 +36,7 @@ class PaymentController extends Controller
 
     public function index(): Response
     {
-        $query = Payment::with(['booking', 'rebooking', 'paymentAccount', 'receivedByUser']);
+        $query = Payment::with(['booking', 'rebooking', 'paymentAccount', 'receivedByUser', 'createdBy']);
 
         // Customers can only see payments for their own bookings
         if (auth()->user()->hasRole('customer')) {
@@ -52,40 +54,26 @@ class PaymentController extends Controller
 
     public function create(): Response
     {
+        // Allow customers to create payments
+        $query = Booking::query();
+
         if (auth()->user()->hasRole('customer')) {
-            abort(403, 'Unauthorized action.');
+            $query->where('created_by', auth()->id());
         }
 
-        $bookings = Booking::with(['rebookings' => function ($q) {
-                $q->whereIn('status', ['approved'])
-                    ->where('payment_status', 'pending')
-                    ->latest();
-            }])
-            ->get()
+        $bookings = $query->get()
             ->filter(function ($booking) {
                 return $booking->balance > 0;
             })
             ->values();
 
-        $rebookings = \App\Models\Rebooking::with(['originalBooking'])
-            ->where('status', 'approved')
-            ->where('payment_status', 'pending')
-            ->where('total_adjustment', '>', 0)
-            ->latest()
-            ->get();
-
         $paymentAccounts = PaymentAccount::active()
             ->ordered()
             ->get();
 
-        // Get query params for pre-selection
-        $rebookingId = request()->query('rebooking_id');
-
         return Inertia::render('payment/create', [
             'bookings' => $bookings,
-            'rebookings' => $rebookings,
             'payment_accounts' => $paymentAccounts,
-            'preselected_rebooking_id' => $rebookingId,
         ]);
     }
 
@@ -102,40 +90,44 @@ class PaymentController extends Controller
                 );
             }
 
-            $payment = Payment::create([
-                ...$data,
-                'received_by' => auth()->id(),
-            ]);
+            // Set status based on role
+            if (auth()->user()->hasRole('customer')) {
+                $data['status'] = 'pending';
+                $data['created_by'] = auth()->id();
+            } else {
+                // Admin/Staff can create approved payments directly
+                $data['status'] = 'approved';
+                $data['received_by'] = auth()->id();
+                $data['created_by'] = auth()->id();
+            }
 
-            // Load relationships for emails
-            $payment->load(['booking', 'paymentAccount', 'receivedByUser']);
+            $payment = Payment::create($data);
+            $payment->load(['booking', 'paymentAccount', 'receivedByUser', 'createdBy']);
 
             DB::commit();
 
             // Send email notifications
             try {
-                // Send to customer
-                if ($payment->booking->guest_email) {
-                    Mail::to($payment->booking->guest_email)->send(new PaymentReceived($payment));
-                }
-
-                // Send to admin/staff
-                $adminEmails = NotificationService::getAdminStaffEmails();
-                if (!empty($adminEmails)) {
-                    Mail::to($adminEmails)->send(new NewPaymentNotification($payment));
+                if (auth()->user()->hasRole('customer')) {
+                    // Notify admins about new customer payment
+                    $adminEmails = NotificationService::getAdminStaffEmails();
+                    if (!empty($adminEmails)) {
+                        Mail::to($adminEmails)->send(new NewPaymentNotification($payment));
+                    }
+                } else {
+                    // Send to customer for admin-created payment
+                    if ($payment->booking->guest_email) {
+                        Mail::to($payment->booking->guest_email)->send(new PaymentReceived($payment));
+                    }
                 }
             } catch (\Exception $e) {
                 Log::error('Payment email failed: ' . $e->getMessage());
             }
 
-            // Redirect based on whether it's a rebooking payment or regular payment
-            if ($payment->rebooking_id) {
-                return redirect()->route('rebookings.show', $payment->rebooking_id)
-                    ->with('success', 'Rebooking payment recorded successfully.');
-            }
-
             return redirect()->route('bookings.show', $payment->booking)
-                ->with('success', 'Payment recorded successfully.');
+                ->with('success', auth()->user()->hasRole('customer')
+                    ? 'Payment submitted for approval.'
+                    : 'Payment recorded successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());
@@ -149,7 +141,7 @@ class PaymentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $payment->load(['booking', 'rebooking', 'paymentAccount', 'receivedByUser', 'refunds']);
+        $payment->load(['booking', 'rebooking', 'paymentAccount', 'receivedByUser', 'createdBy', 'refunds']);
 
         return Inertia::render('payment/show', [
             'payment' => $payment,
@@ -158,6 +150,16 @@ class PaymentController extends Controller
 
     public function edit(Payment $payment): Response
     {
+        // Customers can only edit pending payments they created
+        if (auth()->user()->hasRole('customer')) {
+            if ($payment->booking->created_by !== auth()->id()) {
+                abort(403, 'Unauthorized action.');
+            }
+            if ($payment->status !== 'pending') {
+                abort(403, 'Cannot edit approved or rejected payment.');
+            }
+        }
+
         $payment->load(['rebooking']);
 
         $paymentAccounts = PaymentAccount::active()
@@ -172,6 +174,16 @@ class PaymentController extends Controller
 
     public function update(UpdatePaymentRequest $request, Payment $payment): RedirectResponse
     {
+        // Customers can only edit pending payments they created
+        if (auth()->user()->hasRole('customer')) {
+            if ($payment->booking->created_by !== auth()->id()) {
+                abort(403, 'Unauthorized action.');
+            }
+            if ($payment->status !== 'pending') {
+                abort(403, 'Cannot edit approved or rejected payment.');
+            }
+        }
+
         DB::beginTransaction();
         try {
             $data = $request->validated();
@@ -192,18 +204,14 @@ class PaymentController extends Controller
                 $data['reference_image'] = null;
             }
 
+            // Keep status pending for customer edits
+            if (auth()->user()->hasRole('customer')) {
+                $data['status'] = 'pending';
+            }
+
             $payment->update($data);
 
-            // Update booking paid amounts (handled by Payment model boot method)
-            // booking->updatePaidAmount() is called automatically
-
             DB::commit();
-
-            // Redirect based on whether it's a rebooking payment or regular payment
-            if ($payment->rebooking_id) {
-                return redirect()->route('rebookings.show', $payment->rebooking_id)
-                    ->with('success', 'Rebooking payment updated successfully.');
-            }
 
             return redirect()->route('bookings.show', $payment->booking)
                 ->with('success', 'Payment updated successfully.');
@@ -215,10 +223,19 @@ class PaymentController extends Controller
 
     public function destroy(Payment $payment): RedirectResponse
     {
+        // Customers can only delete pending payments they created
+        if (auth()->user()->hasRole('customer')) {
+            if ($payment->booking->created_by !== auth()->id()) {
+                abort(403, 'Unauthorized action.');
+            }
+            if ($payment->status !== 'pending') {
+                abort(403, 'Cannot delete approved or rejected payment.');
+            }
+        }
+
         DB::beginTransaction();
         try {
             $booking = $payment->booking;
-            $rebookingId = $payment->rebooking_id;
 
             if ($payment->reference_image) {
                 $this->deleteImageFromPrivate($payment->reference_image);
@@ -226,19 +243,73 @@ class PaymentController extends Controller
 
             $payment->delete();
 
-            // Update booking paid amounts (handled by Payment model boot method)
-            // booking->updatePaidAmount() is called automatically
-
             DB::commit();
-
-            // Redirect based on whether it's a rebooking payment or regular payment
-            if ($rebookingId) {
-                return redirect()->route('rebookings.show', $rebookingId)
-                    ->with('success', 'Rebooking payment deleted successfully.');
-            }
 
             return redirect()->route('bookings.show', $booking)
                 ->with('success', 'Payment deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function approve(Payment $payment): RedirectResponse
+    {
+        if (auth()->user()->hasRole('customer')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $payment->update([
+                'status' => 'approved',
+                'received_by' => auth()->id(),
+            ]);
+
+            $payment->load('booking');
+
+            DB::commit();
+
+            // Send approval email
+            try {
+                if ($payment->booking->guest_email) {
+                    Mail::to($payment->booking->guest_email)->send(new PaymentApproved($payment));
+                }
+            } catch (\Exception $e) {
+                Log::error('Payment approval email failed: ' . $e->getMessage());
+            }
+
+            return back()->with('success', 'Payment approved successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function reject(Payment $payment): RedirectResponse
+    {
+        if (auth()->user()->hasRole('customer')) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $payment->update(['status' => 'rejected']);
+
+            $payment->load('booking');
+
+            DB::commit();
+
+            // Send rejection email
+            try {
+                if ($payment->booking->guest_email) {
+                    Mail::to($payment->booking->guest_email)->send(new PaymentRejected($payment));
+                }
+            } catch (\Exception $e) {
+                Log::error('Payment rejection email failed: ' . $e->getMessage());
+            }
+
+            return back()->with('success', 'Payment rejected successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', $e->getMessage());

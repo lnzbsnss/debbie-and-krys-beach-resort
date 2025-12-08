@@ -22,6 +22,8 @@ class Payment extends Model
         'reference_image',
         'notes',
         'received_by',
+        'created_by',
+        'status',
         'payment_date',
     ];
 
@@ -33,6 +35,26 @@ class Payment extends Model
     ];
 
     protected $appends = ['payment_method', 'refunded_amount', 'remaining_amount'];
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
 
     public function booking(): BelongsTo
     {
@@ -108,27 +130,35 @@ class Payment extends Model
         });
 
         static::created(function ($payment) {
-            $payment->booking->updatePaidAmount();
+            // Only update if approved
+            if ($payment->status === 'approved') {
+                $payment->booking->updatePaidAmount();
 
-            // Update rebooking payment status if applicable
-            if ($payment->rebooking_id) {
-                self::updateRebookingPaymentStatus($payment->rebooking_id);
+                if ($payment->rebooking_id) {
+                    self::updateRebookingPaymentStatus($payment->rebooking_id);
+                }
             }
         });
 
         static::updated(function ($payment) {
-            $payment->booking->updatePaidAmount();
+            // Update booking amounts when status changes or amount changes
+            if ($payment->isDirty(['status', 'amount'])) {
+                $payment->booking->updatePaidAmount();
 
-            if ($payment->rebooking_id) {
-                self::updateRebookingPaymentStatus($payment->rebooking_id);
+                if ($payment->rebooking_id) {
+                    self::updateRebookingPaymentStatus($payment->rebooking_id);
+                }
             }
         });
 
         static::deleted(function ($payment) {
-            $payment->booking->updatePaidAmount();
+            // Only update if was approved
+            if ($payment->status === 'approved') {
+                $payment->booking->updatePaidAmount();
 
-            if ($payment->rebooking_id) {
-                self::updateRebookingPaymentStatus($payment->rebooking_id);
+                if ($payment->rebooking_id) {
+                    self::updateRebookingPaymentStatus($payment->rebooking_id);
+                }
             }
         });
     }

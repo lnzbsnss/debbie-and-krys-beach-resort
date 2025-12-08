@@ -19,6 +19,11 @@ export interface FinancialStats {
     payments_this_month: number;
 }
 
+export interface PaymentStats {
+    pending: number;
+    approved_today: number;
+}
+
 export interface RebookingStats {
     pending: number;
     approved: number;
@@ -45,6 +50,7 @@ export interface FAQStats {
 export interface AdminDashboardStats {
     bookings: BookingStats;
     financial: FinancialStats;
+    payments: PaymentStats;
     rebookings: RebookingStats;
     accommodations: AccommodationStats;
     feedback: FeedbackStats;
@@ -55,11 +61,19 @@ export interface CustomerBookingStats {
     total: number;
     active: number;
     completed: number;
+    pending?: number;
+    confirmed?: number;
 }
 
 export interface CustomerFinancialStats {
     total_spent: number;
     unpaid_amount: number;
+    monthly_revenue?: number;
+    total_revenue?: number;
+}
+
+export interface CustomerPaymentStats {
+    pending: number;
 }
 
 export interface CustomerRebookingStats {
@@ -69,6 +83,7 @@ export interface CustomerRebookingStats {
 export interface CustomerDashboardStats {
     bookings: CustomerBookingStats;
     financial: CustomerFinancialStats;
+    payments: CustomerPaymentStats;
     rebookings: CustomerRebookingStats;
 }
 

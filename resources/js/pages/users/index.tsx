@@ -91,14 +91,14 @@ export default function Index({ users, availableRoles, filterOptions, queryParam
             filterable: true,
             width: '120px',
         },
-        {
-            key: 'email_verified_display',
-            label: 'Email Verified',
-            sortable: true,
-            searchable: false,
-            filterable: true,
-            width: '140px',
-        },
+        // {
+        //     key: 'email_verified_display',
+        //     label: 'Email Verified',
+        //     sortable: true,
+        //     searchable: false,
+        //     filterable: true,
+        //     width: '140px',
+        // },
         {
             key: 'roles_display',
             label: 'Roles',
